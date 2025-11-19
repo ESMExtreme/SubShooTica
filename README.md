@@ -1,5 +1,11 @@
-# SubShooTica
 
 # Instalacja!
 
--# To be Continued...
+
+*To be Continued...*
+
+
+
+# Credits
+
+[Subnautica](https://subnautica.fandom.com/wiki/Subnautica_Wiki)
