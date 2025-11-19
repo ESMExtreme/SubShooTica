@@ -1,1 +1,5 @@
 # SubShooTica
+
+# Instalacja!
+
+#-chwilowo nic
