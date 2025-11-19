@@ -2,4 +2,4 @@
 
 # Instalacja!
 
-#-chwilowo nic
+-# To be Continued...
