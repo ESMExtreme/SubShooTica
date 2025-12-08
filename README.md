@@ -6,6 +6,10 @@ Hola
 *To be Continued...*
 
 
+# Authors
+[Daniel Cebula](https://github.com/ESMExtreme/)
+[Filip Będkowski](https://github.com/curdefaya)
+[Marek Bochenek](https://github.com/Chlep6g)
 
 # Credits
 
