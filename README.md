@@ -1,10 +1,7 @@
 Hola
 
 # Instalacja!
-
-
-Uruchomić 
-`vcpkg_install.ps1`
+https://www.sfml-dev.org/download/sfml/3.0.2/
 
 
 # Authors
