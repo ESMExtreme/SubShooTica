@@ -3,7 +3,8 @@ Hola
 # Instalacja!
 
 
-*To be Continued...*
+Uruchomić 
+`vcpkg_install.ps1`
 
 
 # Authors
