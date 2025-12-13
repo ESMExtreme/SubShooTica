@@ -1,7 +1,12 @@
 Hola
 
 # Instalacja!
-https://www.sfml-dev.org/download/sfml/3.0.2/
+## *Windows Visual Studio!*
+1. Pobieramy VS
+2. Pobieramy Git
+3. Pobieramy Cmake
+Otwieramy projekt w VS i czekamy na instalacje poprzez Cmake
+
 
 
 # Authors
