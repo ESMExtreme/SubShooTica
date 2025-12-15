@@ -1,9 +1,4 @@
 {
-  "ExpandedNodes": [
-    "",
-    "\\Src"
-  ],
-  "PreviewInSolutionExplorer": false,
   "DevContainersInfoBarHidden": true,
   "OutputFoldersPerTargetSystem": {
     "Local Machine": [
@@ -15,5 +10,11 @@
       "out\\install\\x64-Debug"
     ]
   },
-  "ActiveTargetSystem": "Local Machine"
+  "ActiveTargetSystem": "Local Machine",
+  "ExpandedNodes": [
+    "",
+    "\\Src"
+  ],
+  "SelectedNode": "\\Src\\main.cpp",
+  "PreviewInSolutionExplorer": false
 }
