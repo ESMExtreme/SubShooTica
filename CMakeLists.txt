@@ -19,7 +19,7 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/Src/*"
 
 )
-add_executable(main src/main.cpp)
+add_executable(main src/main.cpp "Src/MainMenu.cpp" "Src/MainMenu.h" "Src/OptionsMenu.cpp")
 
 target_compile_features(main PRIVATE cxx_std_17)
 
