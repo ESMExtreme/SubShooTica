@@ -1,0 +1,6 @@
+{
+    "code-runner.executorMap": {
+        "cpp": "g++ -std=c++17 -Wall -o ../Trash/output.exe main.cpp Menu.cpp -lsfml-graphics -lsfml-window -lsfml-system&& ../Trash/output.exe"
+    },
+    "code-runner.runInTerminal": true
+}
