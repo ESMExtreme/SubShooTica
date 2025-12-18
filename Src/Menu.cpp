@@ -2,7 +2,7 @@
 #include <iostream>
 
 Menu::Menu(sf::RenderWindow& window) {
-    if (!font.loadFromFile("../Media/arial.ttf")) {
+    if (!font.loadFromFile("./Media/arial.ttf")) {
         std::cerr << "Error loading font\n";
     }
 
