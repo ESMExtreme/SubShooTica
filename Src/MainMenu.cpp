@@ -12,7 +12,7 @@ void MainMenuRenderer(sf::RenderWindow& window, bool* mainMenuOn, bool* optionsM
     sf::Vector2u size = window.getSize();
     auto [Wwidth, Wheight] = size;
     // berlin-sans-fb-demi-bold
-    sf::Font font("BerlinSans.ttf"); // Throws sf::Exception if an error occurs
+    sf::Font font("Assets/Fonts/BerlinSans.ttf"); // Throws sf::Exception if an error occurs
     // Main text (created once)
     sf::Text mainText(font);
     mainText.setString("Hello world");
@@ -60,7 +60,7 @@ void MainMenuRenderer(sf::RenderWindow& window, bool* mainMenuOn, bool* optionsM
             if (mouseButtonPressed->button == sf::Mouse::Button::Left)
             {
                 cout << "mouse x: " << mouseButtonPressed->position.x << ", mouse y: " << mouseButtonPressed->position.y << endl;
-                if ((mouseButtonPressed->position.x <= buttonLocation[1]) && (mouseButtonPressed->position.y >= buttonLocation[2]) && (mouseButtonPressed->position.y <= buttonLocation[3])) {
+                if ((mouseButtonPressed->position.x >= buttonLocation[0]) && (mouseButtonPressed->position.x <= buttonLocation[1]) && (mouseButtonPressed->position.y >= buttonLocation[2]) && (mouseButtonPressed->position.y <= buttonLocation[3])) {
                     *mainMenuOn = false;
                     *optionsMenuOn = true;
                 }

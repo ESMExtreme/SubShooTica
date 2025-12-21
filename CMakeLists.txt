@@ -25,5 +25,22 @@ target_compile_features(main PRIVATE cxx_std_17)
 
 target_link_libraries(main PRIVATE SFML::Graphics)
 
+# --- Assets / Fonts handling ---
+# Place your font files in: <repo-root>/Assets/Fonts/*.ttf (or other font extensions)
+set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/Assets")
+file(GLOB_RECURSE FONT_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Fonts/*")
 
+if(FONT_FILES)
+    # Ensure destination directory exists
+    add_custom_command(TARGET main POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/Assets/Fonts"
+    )
+    # Copy each font to the runtime output directory
+    foreach(_font ${FONT_FILES})
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_font}" "$<TARGET_FILE_DIR:main>/Assets/Fonts"
+            COMMENT "Copying font ${_font} to runtime output"
+        )
+    endforeach()
+endif()
 

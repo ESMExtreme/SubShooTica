@@ -36,7 +36,7 @@ int main()
             MainMenuRenderer(window, &CurrentlyRendering.mainMenuOn, &CurrentlyRendering.optionsMenuOn);
         }
         if (CurrentlyRendering.optionsMenuOn) {
-            OptionsMenuRenderer(window);
+            OptionsMenuRenderer(window, &CurrentlyRendering.mainMenuOn, &CurrentlyRendering.optionsMenuOn, &CurrentlyRendering.WINDOW_W, &CurrentlyRendering.WINDOW_H, &CurrentlyRendering.FramerateLimit);
         }
 
     }
