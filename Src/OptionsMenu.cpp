@@ -12,7 +12,7 @@ void OptionsMenuRenderer(sf::RenderWindow& window) {
     sf::Vector2u size = window.getSize();
     auto [Wwidth, Wheight] = size;
     // berlin-sans-fb-demi-bold
-    sf::Font font("Fonts/BerlinSans.ttf"); // Throws sf::Exception if an error occurs
+    sf::Font font("BerlinSans.ttf"); // Throws sf::Exception if an error occurs
     // Main text (created once)
     sf::Text mainText(font);
     mainText.setString("Options");
