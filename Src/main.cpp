@@ -1,31 +1,44 @@
 #include <SFML/Graphics.hpp>
-#include "Menu.h"
+#include <SFML/Audio.hpp>
+#include <optional>
+#include <iostream>
+#include <vector>
+#include "MainMenu.h"
+#include "OptionsMenu.h"
 
-int main() {
-    sf::RenderWindow window(sf::VideoMode(1280, 720), "SubShooTica");
-    window.setFramerateLimit(60);
+struct
+{
+    unsigned WINDOW_W = 1920u;
+    unsigned WINDOW_H = 1080u;
+    int FramerateLimit = 144;
+    bool mainMenuOn = true;
+    bool optionsMenuOn = false;
+} CurrentlyRendering;
+using namespace std;
 
-    Menu menu(window);
-    bool game_start = menu.run(window);
 
-    if (!game_start) {
-        return 0;
-    }
 
-    // Pętla gry
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
+
+
+int main()
+{
+    auto window = sf::RenderWindow(sf::VideoMode({ CurrentlyRendering.WINDOW_W, CurrentlyRendering.WINDOW_H }), "SubShootica");
+    window.setFramerateLimit(CurrentlyRendering.FramerateLimit);
+
+    sf::Vector2u size = window.getSize();
+    auto [Wwidth, Wheight] = size;
+
+    while (window.isOpen())
+    {
+
+
+        if (CurrentlyRendering.mainMenuOn) {
+            MainMenuRenderer(window, &CurrentlyRendering.mainMenuOn, &CurrentlyRendering.optionsMenuOn);
+        }
+        if (CurrentlyRendering.optionsMenuOn) {
+            OptionsMenuRenderer(window);
         }
 
-        window.clear(sf::Color::Black);
-
-        // tutaj dodasz logikę gry
-
-        window.display();
     }
 
-    return 0;
 }
