@@ -30,6 +30,8 @@ target_link_libraries(main PRIVATE SFML::Graphics)
 set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/Assets")
 file(GLOB_RECURSE FONT_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Fonts/*")
 
+file(GLOB_RECURSE OPTION_FILE CONFIGURE_DEPENDS "${ASSETS_DIR}/options.txt")
+
 if(FONT_FILES)
     # Ensure destination directory exists
     add_custom_command(TARGET main POST_BUILD
@@ -43,4 +45,16 @@ if(FONT_FILES)
         )
     endforeach()
 endif()
-
+if(OPTION_FILE)
+    # Ensure destination directory exists
+    add_custom_command(TARGET main POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/Assets"
+    )
+    # Copy options.txt to the runtime output directory
+    foreach(_option ${OPTION_FILE})
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_option}" "$<TARGET_FILE_DIR:main>/Assets"
+            COMMENT "Copying options.txt to runtime output"
+        )
+    endforeach()
+endif()

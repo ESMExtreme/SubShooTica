@@ -7,9 +7,9 @@ MainMenu::MainMenu(float width, float height)
     {
         // handle error (log, throw, fallback). For now we leave an inline comment.
     }
-	CreateTile("Start Game", sf::Color::White, { 400,200 }, 0);
-    CreateTile("Options", sf::Color::Red, { 400,400 }, 1);
-    CreateTile("GGs Game", sf::Color::White, { 400,600 }, 2);
+	CreateTile("Start Game", sf::Color::Red, { 400,200 }, 0);
+    CreateTile("Options", sf::Color::White, { 400,400 }, 1);
+    CreateTile("Exit", sf::Color::White, { 400,600 }, 2);
     selectedItemIndex = 0; // start with first item selected
 }
 void MainMenu::CreateTile(std::string string, sf::Color color, sf::Vector2f position,int index)
@@ -17,6 +17,7 @@ void MainMenu::CreateTile(std::string string, sf::Color color, sf::Vector2f posi
 	sf::Text text(font);
 	text.setString(string);
 	text.setCharacterSize(70);
+	text.setFillColor(color);
 	text.setPosition(position);
 	mainMenu.push_back(text);
 }

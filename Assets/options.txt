@@ -1,0 +1,5 @@
+resolutionW: 1920
+resolutionH: 1080
+fullscreen: 1
+vsync: 1
+fps_limit: 120
