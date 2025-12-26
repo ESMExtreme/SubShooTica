@@ -1,181 +1,256 @@
-#include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
-#include <optional>
-#include <iostream>
-#include <vector>
 #include "OptionsMenu.h"
+
+
+
+using namespace sf;
 using namespace std;
-float margin = 15;
-int LabelI1 = 1;
-int LabelI2 = 0;
-vector<string> messages1{
-"Resolution: 1280x720",
-"Resolution: 1920x1200",
-"Resolution: 2560x1440",
-};
-vector<string> messages2{
-"Vsync",
-"FPS cap: 60",
-"FPS cap: 120",
-"FPS cap: 240"
-};
-void OptionsMenuRenderer(sf::RenderWindow& window, bool* mainMenuOn, bool* optionsMenuOn, unsigned* WINDOW_W, unsigned* WINDOW_H, int* FramerateLimit) {
+vector<Vector2u> resolutions = { {1280,720}, {1920,1080}, {2560,1440}, {3840,2160} };
+vector<string> fpsLimits = { "30","60","120","144","240","Unlimited" };
+vector<string> VsyncOptions = { "ON","OFF" };
+vector<string> fullscreenOptions = { "ON","OFF" };
 
-    sf::Vector2u size = window.getSize();
-    auto [Wwidth, Wheight] = size;
-    // berlin-sans-fb-demi-bold
-    sf::Font font("Assets/Fonts/BerlinSans.ttf"); // Throws sf::Exception if an error occurs
-    // Main text (created once)
-    sf::Text mainText(font);
-    mainText.setString("Options");
-    mainText.setPosition({ 10, 10 });
-    mainText.setCharacterSize(24);
-    mainText.setFillColor(sf::Color(255, 165, 0)); // orange
-
-    // Button rectangle
-    sf::Vector2f buttonSize{ 
-        300, 
-        60 };
-
-    sf::RectangleShape button1(buttonSize);
-    button1.setFillColor(sf::Color(70, 70, 70));
-    button1.setOutlineColor(sf::Color::White);
-    button1.setOutlineThickness(2.f);
-    button1.setPosition({ 10, 10 + buttonSize.y + margin });
-    vector<float> button1Location{
-        10,
-        10+ buttonSize.x,
-        10 + buttonSize.y + margin ,
-        10 + 2*buttonSize.y+ margin,
-    };
-
-    // Button label
-    sf::Text button1Label(font);
-    button1Label.setCharacterSize(20);
-    button1Label.setFillColor(sf::Color::White);
-    button1Label.setPosition({ 10 + margin, 10 + buttonSize.y + margin + buttonSize.y / 4 });
-
-    button1Label.setString(messages1[LabelI1]);
-    // Button rectangle
-    sf::RectangleShape button2(buttonSize);
-    button2.setFillColor(sf::Color(70, 70, 70));
-    button2.setOutlineColor(sf::Color::White);
-    button2.setOutlineThickness(2.f);
-    button2.setPosition({ 10, 10 + 2 * buttonSize.y + 2 * margin });
-    vector<float> button2Location{
-        10,
-        10 + buttonSize.x,
-        10 + 2*buttonSize.y + 2*margin ,
-        10 + 3 * buttonSize.y + 2*margin,
-    };
-
-    // Button label
-    sf::Text button2Label(font);
-    button2Label.setCharacterSize(20);
-    button2Label.setFillColor(sf::Color::White);
-    button2Label.setPosition({ 10 + margin, 10 + 2*buttonSize.y + 2*margin + buttonSize.y/4 });
-
-    button2Label.setString(messages2[LabelI2]);
-    // Button rectangle
-    sf::RectangleShape buttonExit(buttonSize);
-    buttonExit.setFillColor(sf::Color(70, 70, 70));
-    buttonExit.setOutlineColor(sf::Color::White);
-    buttonExit.setOutlineThickness(2.f);
-    buttonExit.setPosition({ (Wwidth- buttonSize.x - margin - 10), (Wheight - buttonSize.y - margin - 10) });
-    vector<float> buttonExitLocation{
-        Wwidth- buttonSize.x - margin - 10,
-        Wwidth - margin - 10,
-		Wheight - buttonSize.y - margin - 10,
-		Wheight - margin-10,
-    };
-    // Button label
-    sf::Text buttonExitLabel(font);
-    buttonExitLabel.setCharacterSize(20);
-    buttonExitLabel.setFillColor(sf::Color::White);
-    buttonExitLabel.setPosition({ (Wwidth - buttonSize.x - margin - 10), (Wheight - buttonSize.y - margin - 10) });
-    buttonExitLabel.setString("Main Menu");
-
-    // Use `auto` so the compiler deduces the std::optional<sf::Event> type
-    while (auto event = window.pollEvent())
+struct  {
+    int resolutionIndex = 1;
+    int fullscreenIndex = 0;
+    int vsyncIndex = 0;
+    int fpsLimitIndex = 2;
+} tempOptions;
+void OptionsMenu::keyPressHandler(const Event::KeyPressed* key, int* currentScreen)
+{
+    using Key = sf::Keyboard::Key;
+    if (key->code == Key::Up)
     {
-        const auto onClose = [&window](const sf::Event::Closed&)
-            {
-                window.close();
-            };
+        MoveUp();
+        return;
+    }
 
-        if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>())
+    if (key->code == Key::Down)
+    {
+        MoveDown();
+        return;
+    }
+    if (key->code == Key::Left)
+    {
+        switch (selectedItemIndex)
         {
+        case 0:
+            cout << "Left pressed on Resolution" << endl;
+            tempOptions.resolutionIndex--;
+            if (tempOptions.resolutionIndex < 0)
+                tempOptions.resolutionIndex = static_cast<int>(resolutions.size()) - 1;
+			optionsMenu[0].setString(string("Resolution: ") + to_string(resolutions[tempOptions.resolutionIndex].x) + "x" + to_string(resolutions[tempOptions.resolutionIndex].y));
+            break;
+        case 1:
+            tempOptions.fullscreenIndex--;
+            if (tempOptions.fullscreenIndex < 0)
+                tempOptions.fullscreenIndex = static_cast<int>(fullscreenOptions.size()) - 1;
+			optionsMenu[1].setString(string("Fullscreen: ") + fullscreenOptions[tempOptions.fullscreenIndex]);
+            cout << "Left pressed on Screen" << endl;
+            break;
+        case 2:
+            tempOptions.vsyncIndex--;
+            if (tempOptions.vsyncIndex < 0)
+                tempOptions.vsyncIndex = static_cast<int>(VsyncOptions.size()) - 1;
+			optionsMenu[2].setString(string("Vsync: ") + VsyncOptions[tempOptions.vsyncIndex]);
+            cout << "Left pressed on VSync" << endl;
+            break;
+        case 3:
+            tempOptions.fpsLimitIndex--;
+            if (tempOptions.fpsLimitIndex < 0)
+                tempOptions.fpsLimitIndex = static_cast<int>(fpsLimits.size()) - 1;
+			optionsMenu[3].setString(string("FPS Cap: ") + fpsLimits[tempOptions.fpsLimitIndex]);
+            cout << "Left pressed on FPS Cap" << endl;
+            break;
+        default:
+            break;
 
-            if (mouseButtonPressed->button == sf::Mouse::Button::Left)
+        }
+    }
+
+    if (key->code == Key::Right)
+    {
+        switch (selectedItemIndex)
+        {
+        case 0:
+            tempOptions.resolutionIndex++;
+            if (tempOptions.resolutionIndex >= static_cast<int>(resolutions.size()))
+                tempOptions.resolutionIndex = 0;
+            optionsMenu[0].setString(string("Resolution: ") + to_string(resolutions[tempOptions.resolutionIndex].x) + "x" + to_string(resolutions[tempOptions.resolutionIndex].y));
+            cout << "Left pressed on Resolution" << endl;
+            break;
+        case 1:
+            tempOptions.fullscreenIndex++;
+            if (tempOptions.fullscreenIndex >= static_cast<int>(fullscreenOptions.size()))
+                tempOptions.fullscreenIndex = 0;
+            optionsMenu[1].setString(string("Fullscreen: ") + fullscreenOptions[tempOptions.fullscreenIndex]);
+            cout << "Left pressed on Screen" << endl;
+            break;
+        case 2:
+            tempOptions.vsyncIndex++;
+            if (tempOptions.vsyncIndex >= static_cast<int>(VsyncOptions.size()))
+                tempOptions.vsyncIndex = 0;
+            optionsMenu[2].setString(string("Vsync: ") + VsyncOptions[tempOptions.vsyncIndex]);
+            cout << "Left pressed on VSync" << endl;
+            break;
+        case 3:
+            tempOptions.fpsLimitIndex++;
+            if (tempOptions.fpsLimitIndex >= static_cast<int>(fpsLimits.size()))
+                tempOptions.fpsLimitIndex = 0;
+            optionsMenu[3].setString(string("FPS Cap: ") + fpsLimits[tempOptions.fpsLimitIndex]);
+            cout << "Left pressed on FPS Cap" << endl;
+            break;
+        default:
+            break;
+
+        }
+    }
+    if (key->code == Key::Enter)
+    {
+        switch (selectedItemIndex)
+        {
+        case 4:
+            // Apply selected
+            cout << "Apply selected" << endl;
+            optionsList.resolution = resolutions[tempOptions.resolutionIndex];
+            optionsList.fullscreen = (tempOptions.fullscreenIndex == 0) ? 1 : 0;
+            optionsList.vsync = (tempOptions.vsyncIndex == 0) ? 1 : 0;
+            if (tempOptions.fpsLimitIndex == 5)
+                optionsList.fpsLimit = 0;
+            else
+                optionsList.fpsLimit = stoi(fpsLimits[tempOptions.fpsLimitIndex]);
             {
-                cout << "mouse x: " << mouseButtonPressed->position.x <<","<< button1Location[0] << ", mouse y: " << mouseButtonPressed->position.y << "  |  " << button2Location[0] << "  -  " << button2Location[2] << endl;
-                if ((mouseButtonPressed->position.x >= button1Location[0]) && (mouseButtonPressed->position.x <= button1Location[1]) && (mouseButtonPressed->position.y >= button1Location[2]) && (mouseButtonPressed->position.y <= button1Location[3])) {
-                    LabelI1++;
-                    if (LabelI1 >= messages1.size()) {
-                        LabelI1 = 0;
-                    }
-                    switch (LabelI1)
-                    {case 0:
-                        window.setSize(sf::Vector2u(1280, 720));
-                        *WINDOW_W = 1280;
-                        *WINDOW_H = 720;
-						break;
-                    case 1:
-                        window.setSize(sf::Vector2u(1920, 1080));
-                        *WINDOW_W = 1920;
-						*WINDOW_H = 1080;
-                        break;
-                    case 2:
-                        window.setSize(sf::Vector2u(2560, 1440));
-						*WINDOW_W = 2560;
-                        *WINDOW_H = 1440;
-                    default:
-                        break;
-                    }
-
-                }
-                if ((mouseButtonPressed->position.x >= button2Location[0]) && (mouseButtonPressed->position.x <= button2Location[1]) && (mouseButtonPressed->position.y >= button2Location[2]) && (mouseButtonPressed->position.y <= button2Location[3])) {
-                    LabelI2++;
-                    if (LabelI2 >= messages2.size()) {
-                        LabelI2 = 0;
-                    }
-
-                }
-                if ((mouseButtonPressed->position.x >= buttonExitLocation[0]) && (mouseButtonPressed->position.x <= buttonExitLocation[1]) && (mouseButtonPressed->position.y >= buttonExitLocation[2]) && (mouseButtonPressed->position.y <= buttonExitLocation[3])) {
-                    *mainMenuOn = true;
-                    *optionsMenuOn = false;
-                }
+                fstream zapis;
+                zapis.open("Assets/options.txt", ios::out);
+                zapis << "resolutionW:" << optionsList.resolution.x << endl;
+                zapis << "resolutionH:" << optionsList.resolution.y << endl;
+                zapis << "fullscreen:" << optionsList.fullscreen << endl;
+                zapis << "vsync:" << optionsList.vsync << endl;
+                zapis << "fps_limit:" << optionsList.fpsLimit << endl;
+                zapis.close();
             }
-        }
 
-
-        if (event->is<sf::Event::Closed>())
-        {
-            window.close();
+            break;
+        case 5:
+            // Exit selected
+            *currentScreen = 0; // Switch to Options Menu
+            break;
         }
     }
-
-    // Real-time keyboard handling (checks current state; good for continuous movement)
-    if (window.hasFocus())
+}
+OptionsMenu::OptionsMenu()
+{
+    fstream optionsFile; //zmienna plikowa, okreœlenie pliku, tzw. uchwyt do pliku
+    optionsFile.open("Assets/options.txt", ios::in); // funkcja do otwarcia pliku, œcie¿ka pliku, tryb otwarcia ios::in->odczyt z pliku
+    if (optionsFile.good() == false)//zwraca wartoœæ prawda/fa³sz w zale¿noœci od tego czy istnieje plik
     {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-        {
-            cout << "Right key pressed (realtime)" << endl;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-        {
-            cout << "Left key pressed (realtime)" << endl;
-        }
+        cout << "Brak pliku" << endl;
+        exit(0);
     }
+    string linia;
+    string word;
+    while (getline(optionsFile, linia)) {
+        stringstream ss(linia);
+        string key, value;
+        getline(ss, key, ':');   // "resolution"
+        getline(ss, value);     // " 1920x1080"
+        cout << key << " -> " << value << endl;
+        if (key == "resolutionW") {
+            optionsList.resolution.x = stoi(value);
+            if (value == "1920")
+                tempOptions.resolutionIndex = 1;
 
-    // Clear the window with a blue background
-    window.clear(sf::Color::Cyan);
-    window.draw(mainText);
-    window.draw(buttonExit);
-    window.draw(buttonExitLabel);
-    window.draw(button1);
-    window.draw(button1Label);
-    window.draw(button2);
-    window.draw(button2Label);
-    window.display();
+            else if (value == "1280")
+                tempOptions.resolutionIndex = 0;
+
+            else if (value == "2560")
+                tempOptions.resolutionIndex = 2;
+
+            else if (value == "3840")
+                tempOptions.resolutionIndex = 3;
+
+        }
+        else if (key == "resolutionH") {
+            optionsList.resolution.y = stoi(value);
+        }
+        else if (key == "fullscreen") {
+            optionsList.fullscreen = stoi(value);
+            if (value == "0")
+                tempOptions.fullscreenIndex = 0;
+
+            else
+                tempOptions.fullscreenIndex = 1;
+        }
+        else if (key == "vsync") {
+            optionsList.vsync = stoi(value);
+            if (value == "0")
+                tempOptions.vsyncIndex = 0;
+            else
+                tempOptions.vsyncIndex = 1;
+        }
+        else if (key == "fps_limit") {
+            optionsList.fpsLimit = stoi(value);
+            if (value == "30")
+                tempOptions.fpsLimitIndex = 0;
+            else if (value == "60")
+                tempOptions.fpsLimitIndex = 1;
+            else if (value == "120")
+                tempOptions.fpsLimitIndex = 2;
+            else if (value == "144")
+                tempOptions.fpsLimitIndex = 3;
+            else if (value == "240")
+                tempOptions.fpsLimitIndex = 4;
+            else if (value == "0")
+                tempOptions.fpsLimitIndex = 5;
+
+        }
+
+    };
+
+    // ensure the font path matches what you copy in CMake (example: Assets/Fonts/arial.ttf)
+    if (!font.openFromFile("Assets/Fonts/BerlinSans.ttf"))
+    {
+        // handle error (log, throw, fallback). For now we leave an inline comment.
+    }
+    CreateTile(string("Resolution: ") + to_string(resolutions[tempOptions.resolutionIndex].x)+"x"+ to_string(resolutions[tempOptions.resolutionIndex].y), sf::Color::Red, {400,200}, 0, 70);
+    CreateTile(std::string("Fullscreen: ") + fullscreenOptions[tempOptions.fullscreenIndex], sf::Color::White, {400,300}, 1, 70);
+    CreateTile(std::string("Vsync: ") + VsyncOptions[tempOptions.fullscreenIndex], sf::Color::White, { 400,400 }, 1, 70);
+    CreateTile(string("FPS Cap: ") + fpsLimits[tempOptions.fpsLimitIndex], sf::Color::White, { 400,500 }, 0, 70);
+	CreateTile(std::string("Apply"), sf::Color::White, { 400,600 }, 3, 70);
+    CreateTile(std::string("Back"), sf::Color::White, { 700,700 }, 3, 70);
+    selectedItemIndex = 0; // start with first item selected
+}
+void OptionsMenu::CreateTile(std::string string, sf::Color color, sf::Vector2f position, int index,int fontSize)
+{
+    sf::Text text(font);
+    text.setString(string);
+    text.setCharacterSize(fontSize);
+    text.setFillColor(color);
+    text.setPosition(position);
+    optionsMenu.push_back(text);
+}
+void OptionsMenu::draw(sf::RenderWindow& window)
+{
+    for (const auto item : optionsMenu)
+    {
+        window.draw(item);
+    }
+}
+
+void OptionsMenu::MoveUp() {
+    optionsMenu[selectedItemIndex].setFillColor(sf::Color::White);
+    if (selectedItemIndex == 0)
+        selectedItemIndex = static_cast<int>(optionsMenu.size()) - 1;
+    else
+        --selectedItemIndex;
+    optionsMenu[selectedItemIndex].setFillColor(sf::Color::Red);
+}
+
+void OptionsMenu::MoveDown()
+{
+    optionsMenu[selectedItemIndex].setFillColor(sf::Color::White);
+    if (selectedItemIndex == static_cast<int>(optionsMenu.size()) - 1)
+        selectedItemIndex = 0;
+    else
+        ++selectedItemIndex;
+    optionsMenu[selectedItemIndex].setFillColor(sf::Color::Red);
 }
