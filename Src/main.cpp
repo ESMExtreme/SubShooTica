@@ -1,44 +1,33 @@
 #include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
-#include <optional>
-#include <iostream>
-#include <vector>
 #include "MainMenu.h"
-#include "OptionsMenu.h"
-
-struct
-{
-    unsigned WINDOW_W = 1920u;
-    unsigned WINDOW_H = 1080u;
-    int FramerateLimit = 144;
-    bool mainMenuOn = true;
-    bool optionsMenuOn = false;
-} CurrentlyRendering;
-using namespace std;
-
-
-
-
 
 int main()
 {
-    auto window = sf::RenderWindow(sf::VideoMode({ CurrentlyRendering.WINDOW_W, CurrentlyRendering.WINDOW_H }), "SubShootica");
-    window.setFramerateLimit(CurrentlyRendering.FramerateLimit);
-
-    sf::Vector2u size = window.getSize();
-    auto [Wwidth, Wheight] = size;
+    sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "SubShootica");
+    MainMenu menu(window.getSize().x, window.getSize().y);
 
     while (window.isOpen())
     {
+        // SFML 3: pollEvent() returns std::optional<sf::Event>
+        while (auto event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+                window.close();
 
-
-        if (CurrentlyRendering.mainMenuOn) {
-            MainMenuRenderer(window, &CurrentlyRendering.mainMenuOn, &CurrentlyRendering.optionsMenuOn);
+            // SFML 3: use getIf<T>() to read specific event payloads
+            if (const auto* key = event->getIf<sf::Event::KeyPressed>())
+            {
+                if (key->code == sf::Keyboard::Key::Up)
+                    menu.MoveUp();
+                else if (key->code == sf::Keyboard::Key::Down)
+                    menu.MoveDown();
+            }
         }
-        if (CurrentlyRendering.optionsMenuOn) {
-            OptionsMenuRenderer(window, &CurrentlyRendering.mainMenuOn, &CurrentlyRendering.optionsMenuOn, &CurrentlyRendering.WINDOW_W, &CurrentlyRendering.WINDOW_H, &CurrentlyRendering.FramerateLimit);
-        }
 
+        window.clear();
+        menu.draw(window);
+        window.display();
     }
 
+    return 0;
 }

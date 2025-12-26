@@ -6,8 +6,19 @@
 #include "OptionsMenu.h"
 using namespace std;
 float margin = 15;
-int LabelI1 = 0;
+int LabelI1 = 1;
 int LabelI2 = 0;
+vector<string> messages1{
+"Resolution: 1280x720",
+"Resolution: 1920x1200",
+"Resolution: 2560x1440",
+};
+vector<string> messages2{
+"Vsync",
+"FPS cap: 60",
+"FPS cap: 120",
+"FPS cap: 240"
+};
 void OptionsMenuRenderer(sf::RenderWindow& window, bool* mainMenuOn, bool* optionsMenuOn, unsigned* WINDOW_W, unsigned* WINDOW_H, int* FramerateLimit) {
 
     sf::Vector2u size = window.getSize();
@@ -22,7 +33,10 @@ void OptionsMenuRenderer(sf::RenderWindow& window, bool* mainMenuOn, bool* optio
     mainText.setFillColor(sf::Color(255, 165, 0)); // orange
 
     // Button rectangle
-    sf::Vector2f buttonSize{ 200.f, 60.f };
+    sf::Vector2f buttonSize{ 
+        300, 
+        60 };
+
     sf::RectangleShape button1(buttonSize);
     button1.setFillColor(sf::Color(70, 70, 70));
     button1.setOutlineColor(sf::Color::White);
@@ -39,13 +53,8 @@ void OptionsMenuRenderer(sf::RenderWindow& window, bool* mainMenuOn, bool* optio
     sf::Text button1Label(font);
     button1Label.setCharacterSize(20);
     button1Label.setFillColor(sf::Color::White);
-    button1Label.setPosition({ 10, 10 + buttonSize.y + margin });
-    vector<string> messages1{
-    "Hello world",
-    "SubShootica!",
-    "Button clicked",
-    "SFML + CMake"
-    };
+    button1Label.setPosition({ 10 + margin, 10 + buttonSize.y + margin + buttonSize.y / 4 });
+
     button1Label.setString(messages1[LabelI1]);
     // Button rectangle
     sf::RectangleShape button2(buttonSize);
@@ -64,13 +73,8 @@ void OptionsMenuRenderer(sf::RenderWindow& window, bool* mainMenuOn, bool* optio
     sf::Text button2Label(font);
     button2Label.setCharacterSize(20);
     button2Label.setFillColor(sf::Color::White);
-    button2Label.setPosition({ 10, 10 + 2*buttonSize.y + 2*margin });
-    vector<string> messages2{
-    "Hello world2",
-    "SubShootica!2",
-    "Button clicked2",
-    "SFML + CMake2"
-    };
+    button2Label.setPosition({ 10 + margin, 10 + 2*buttonSize.y + 2*margin + buttonSize.y/4 });
+
     button2Label.setString(messages2[LabelI2]);
     // Button rectangle
     sf::RectangleShape buttonExit(buttonSize);
@@ -84,7 +88,6 @@ void OptionsMenuRenderer(sf::RenderWindow& window, bool* mainMenuOn, bool* optio
 		Wheight - buttonSize.y - margin - 10,
 		Wheight - margin-10,
     };
-
     // Button label
     sf::Text buttonExitLabel(font);
     buttonExitLabel.setCharacterSize(20);
@@ -100,17 +103,34 @@ void OptionsMenuRenderer(sf::RenderWindow& window, bool* mainMenuOn, bool* optio
                 window.close();
             };
 
-
         if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>())
         {
 
             if (mouseButtonPressed->button == sf::Mouse::Button::Left)
             {
-                cout << "mouse x: " << mouseButtonPressed->position.x << ", mouse y: " << mouseButtonPressed->position.y << "  |  " << button2Location[0] << "  -  " << button2Location[2] << endl;
+                cout << "mouse x: " << mouseButtonPressed->position.x <<","<< button1Location[0] << ", mouse y: " << mouseButtonPressed->position.y << "  |  " << button2Location[0] << "  -  " << button2Location[2] << endl;
                 if ((mouseButtonPressed->position.x >= button1Location[0]) && (mouseButtonPressed->position.x <= button1Location[1]) && (mouseButtonPressed->position.y >= button1Location[2]) && (mouseButtonPressed->position.y <= button1Location[3])) {
                     LabelI1++;
                     if (LabelI1 >= messages1.size()) {
                         LabelI1 = 0;
+                    }
+                    switch (LabelI1)
+                    {case 0:
+                        window.setSize(sf::Vector2u(1280, 720));
+                        *WINDOW_W = 1280;
+                        *WINDOW_H = 720;
+						break;
+                    case 1:
+                        window.setSize(sf::Vector2u(1920, 1080));
+                        *WINDOW_W = 1920;
+						*WINDOW_H = 1080;
+                        break;
+                    case 2:
+                        window.setSize(sf::Vector2u(2560, 1440));
+						*WINDOW_W = 2560;
+                        *WINDOW_H = 1440;
+                    default:
+                        break;
                     }
 
                 }
