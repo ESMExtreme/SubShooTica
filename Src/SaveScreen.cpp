@@ -15,7 +15,11 @@ SaveScreen::SaveScreen() {
 
     selectedItemIndex = 0; // start with first item selected
 }
-void SaveScreen::CreateTile(std::string string, sf::Color color, sf::Vector2f position, int index, int fontSize) {
+
+SaveScreen::~SaveScreen() {
+}
+
+void SaveScreen::CreateTile(const std::string& string, sf::Color color, sf::Vector2f position, int index, int fontSize) {
     sf::Text text(font);
     text.setString(string);
     text.setCharacterSize(fontSize);
@@ -24,11 +28,6 @@ void SaveScreen::CreateTile(std::string string, sf::Color color, sf::Vector2f po
     saveMenu.push_back(text);
 }
 
-void SaveScreen::draw(sf::RenderWindow& window) {
-    for (const auto item : saveMenu) {
-        window.draw(item);
-    }
-}
 
 void SaveScreen::MoveUp() {
     saveMenu[selectedItemIndex].setFillColor(sf::Color::White);
@@ -48,35 +47,68 @@ void SaveScreen::MoveDown() {
     saveMenu[selectedItemIndex].setFillColor(sf::Color::Red);
 }
 
+void SaveScreen::handleEvent(const sf::Event& event, int* currentScreen) {
+    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
+        using Key = sf::Keyboard::Key;
+        if (key->code == Key::Up) {
+            MoveUp();
+            return;
+        }
+        if (key->code == Key::Down) {
+            MoveDown();
+            return;
+        }
+        if (key->code == Key::Enter) {
+            switch (selectedItemIndex) {
+            case 0:
+                *currentScreen = 3;
+                break;
+            case 1:
+                *currentScreen = 3;
+                break;
+            case 2:
+                *currentScreen = 3;
+                break;
+            case 3:
+                // Back selected
+                *currentScreen = 0; // Switch to main menu
+                break;
+            }
+        }
+    }
+}
+
 void SaveScreen::keyPressHandler(const sf::Event::KeyPressed* key, int* currentScreen) {
     using Key = sf::Keyboard::Key;
-    if (key->code == Key::Up)
-    {
+    if (key->code == Key::Up) {
         MoveUp();
         return;
     }
-    if (key->code == Key::Down)
-    {
+    if (key->code == Key::Down) {
         MoveDown();
         return;
     }
-    if (key->code == Key::Enter)
-    {
-        switch (selectedItemIndex)
-        {
+    if (key->code == Key::Enter) {
+        switch (selectedItemIndex) {
         case 0:
-            // Zapis 1 selected
+            *currentScreen = 3;
             break;
         case 1:
-            // Zapis 2 selected
+            *currentScreen = 3;
             break;
         case 2:
-            // Zapis 3 selected
+            *currentScreen = 3;
             break;
         case 3:
             // Back selected
             *currentScreen = 0; // Switch to main menu
             break;
         }
+    }
+}
+
+void SaveScreen::draw(sf::RenderWindow& window) {
+    for (auto& text : saveMenu) {
+        window.draw(text);
     }
 }
