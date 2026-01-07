@@ -14,6 +14,7 @@ SaveScreen::SaveScreen() {
     CreateTile("Back", sf::Color::White, { 400, 650 }, 3, 70);
 
     selectedItemIndex = 0; // start with first item selected
+    lastSelectedSlot = 0; // domyślnie slot 0
 }
 
 SaveScreen::~SaveScreen() {
@@ -61,12 +62,15 @@ void SaveScreen::handleEvent(const sf::Event& event, int* currentScreen) {
         if (key->code == Key::Enter) {
             switch (selectedItemIndex) {
             case 0:
+                lastSelectedSlot = 0;
                 *currentScreen = 3;
                 break;
             case 1:
+                lastSelectedSlot = 1;
                 *currentScreen = 3;
                 break;
             case 2:
+                lastSelectedSlot = 2;
                 *currentScreen = 3;
                 break;
             case 3:
@@ -91,12 +95,15 @@ void SaveScreen::keyPressHandler(const sf::Event::KeyPressed* key, int* currentS
     if (key->code == Key::Enter) {
         switch (selectedItemIndex) {
         case 0:
+            lastSelectedSlot = 0;
             *currentScreen = 3;
             break;
         case 1:
+            lastSelectedSlot = 1;
             *currentScreen = 3;
             break;
         case 2:
+            lastSelectedSlot = 2;
             *currentScreen = 3;
             break;
         case 3:

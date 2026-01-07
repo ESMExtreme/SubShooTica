@@ -5,7 +5,7 @@
 #include <random>
 #include <cmath>
 
-GameScreen::GameScreen() {
+GameScreen::GameScreen() : currentSaveSlot(0) {
     ball.setRadius(20.f);
     ball.setFillColor(sf::Color::Blue);
     ball.setPosition(sf::Vector2f(900.f, 900.f));
@@ -14,6 +14,16 @@ GameScreen::GameScreen() {
     enemySpawnTimer = 0.f;
     rng.seed(std::random_device{}());
     distX = std::uniform_real_distribution<float>(0.f, 1920.f); // Zakładając szerokość ekranu 1920
+
+    // Inicjalizacja UI złomu
+    if (!font.openFromFile("Assets/Fonts/BerlinSans.ttf")) {
+        // handle error
+    }
+    scrapText.emplace(font);
+    scrapText->setCharacterSize(30);
+    scrapText->setFillColor(sf::Color::Yellow);
+    scrapText->setPosition(sf::Vector2f(10.f, 10.f));
+    scrapText->setString("Zlom: 0");
 }
 
 void GameScreen::handleEvent(const sf::Event& event, int* currentScreen) {
@@ -32,7 +42,8 @@ void GameScreen::handleEvent(const sf::Event& event, int* currentScreen) {
             bullet.velocity = bulletVelocity + sf::Vector2f(velocity.x * 0.02f, velocity.y);
             bullets.push_back(bullet);
         } else if (key->code == Key::Escape) {
-            *currentScreen = 0; // Powrót do menu
+            saveGame(); // Zapisz grę przed wyjściem
+            *currentScreen = 3; // Zawsze wróć do GameMap (wybór poziomu)
         }
     } else if (const auto* keyReleased = event.getIf<sf::Event::KeyReleased>()) {
         if (keyReleased->code == sf::Keyboard::Key::Left || keyReleased->code == sf::Keyboard::Key::Right) {
@@ -99,6 +110,11 @@ void GameScreen::update(float deltaTime, sf::Vector2u windowSize) {
                 // Usuń wroga i pocisk
                 enemyIt = enemies.erase(enemyIt);
                 bulletDestroyed = true;
+                // Dodaj złom za zabicie wroga
+                saveData.scrap += 10;
+                if (scrapText.has_value()) {
+                    scrapText->setString("Zlom: " + std::to_string(saveData.scrap));
+                }
                 break;
             } else {
                 ++enemyIt;
@@ -125,4 +141,38 @@ void GameScreen::draw(sf::RenderWindow& window) {
     for (const auto& enemy : enemies) {
         window.draw(enemy.shape);
     }
+    // Rysuj UI ze złomem
+    if (scrapText.has_value()) {
+        window.draw(*scrapText);
+    }
+}
+
+std::string GameScreen::getSaveFileName() const {
+    return "Assets/save" + std::to_string(currentSaveSlot) + ".dat";
+}
+
+void GameScreen::setSaveSlot(int slot) {
+    currentSaveSlot = slot;
+    loadGame();
+}
+
+void GameScreen::loadGame() {
+    std::string filename = getSaveFileName();
+    if (SaveData::fileExists(filename)) {
+        saveData.loadFromFile(filename);
+        if (scrapText.has_value()) {
+            scrapText->setString("Zlom: " + std::to_string(saveData.scrap));
+        }
+    } else {
+        // Nowa gra - zresetuj dane
+        saveData = SaveData();
+        if (scrapText.has_value()) {
+            scrapText->setString("Zlom: 0");
+        }
+    }
+}
+
+void GameScreen::saveGame() {
+    std::string filename = getSaveFileName();
+    saveData.saveToFile(filename);
 }

@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 
-GameMap::GameMap() : backgroundTexture(), font(), tiles(), selectedIndex(0)
+GameMap::GameMap() : backgroundTexture(), font(), tiles(), selectedIndex(0), currentSaveSlot(0)
 {
     bool loaded = backgroundTexture.loadFromFile("Assets/Media/Mapa.png");
     if (!loaded) {
@@ -77,52 +77,13 @@ void GameMap::handleEvent(const sf::Event& event, int* currentScreen) {
             }
         } else if (key->code == Key::Enter) {
             // Wybór poziomu w zależności od selectedIndex
-            switch (selectedIndex) {
-                case 0:
-                    *currentScreen = 4; // Poziom 0 - GameScreen
-                    break;
-                case 1:
-                    *currentScreen = 4; // Poziom 1 - GameScreen
-                    break;
-                case 2:
-                    *currentScreen = 4; // Poziom 2 - GameScreen
-                    break;
-                case 3:
-                    *currentScreen = 4; // Poziom 3 - GameScreen
-                    break;
-                case 4:
-                    *currentScreen = 4; // Poziom 4 - GameScreen
-                    break;
-                case 5:
-                    *currentScreen = 4; // Poziom 5 - GameScreen
-                    break;
-                case 6:
-                    *currentScreen = 4; // Poziom 6 - GameScreen
-                    break;
-                case 7:
-                    *currentScreen = 4; // Poziom 7 - GameScreen
-                    break;
-                case 8:
-                    *currentScreen = 4; // Poziom 8 - GameScreen
-                    break;
-                case 9:
-                    *currentScreen = 4; // Poziom 9 - GameScreen
-                    break;
-                case 10:
-                    *currentScreen = 4; // Poziom 10 - GameScreen
-                    break;
-                case 11:
-                    *currentScreen = 4; // Poziom 11 - GameScreen
-                    break;
-                case 12:
-                    *currentScreen = 4; // Poziom 12 - GameScreen
-                    break;
-                default:
-                    *currentScreen = 4; // Domyślnie GameScreen
-                    break;
+            if (selectedIndex == 0) {
+                *currentScreen = 4; // Poziom 0 - Sklep
+            } else {
+                *currentScreen = 5; // Poziomy 1-12 - bezpośrednio do gry
             }
         } else if (key->code == Key::Escape) {
-            *currentScreen = 0; // Powrót do menu
+            *currentScreen = *currentScreen - 1; // Cofnij do poprzedniego ekranu (SaveScreen)
         }
     }
 }

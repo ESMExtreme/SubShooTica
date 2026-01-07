@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <random>
+#include <optional>
+#include "SaveData.h"
 
 struct Bullet {
     sf::CircleShape shape;
@@ -22,6 +24,10 @@ public:
     void handleEvent(const sf::Event& event, int* currentScreen);
     void update(float deltaTime, sf::Vector2u windowSize);
     void draw(sf::RenderWindow& window);
+    void setSaveSlot(int slot);
+    void loadGame();
+    void saveGame();
+    int getScrap() const { return saveData.scrap; }
 
 private:
     sf::CircleShape ball;
@@ -32,6 +38,16 @@ private:
     float enemySpawnTimer;
     std::mt19937 rng;
     std::uniform_real_distribution<float> distX;
+
+    // System zapisu
+    SaveData saveData;
+    int currentSaveSlot;
+
+    // UI złomu
+    sf::Font font;
+    std::optional<sf::Text> scrapText;
+
+    std::string getSaveFileName() const;
 };
 
 #endif // GAMESCREEN_H

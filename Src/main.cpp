@@ -5,17 +5,20 @@
 #include "OptionsMenu.h"
 #include "SaveScreen.h"
 #include "GameMap.h"
+#include "ShopInGame.h"
 
 using namespace sf;
 using namespace std;
 int CurrentScreen = 0; // 0 - MainMenu, 1 - OptionsMenu , 2 - SaveScreen , 3-Mapa, 4-GameScreen
+int PreviousScreen = 0; // Śledź poprzedni ekran
 
 int main()
 {
     sf::RenderWindow window;
 	OptionsMenu optionsMenu;
     SaveScreen saveScreen;
-    GameScreen game;
+    ShopInGame shop;
+    GameScreen lvl1;
     GameMap map;
 
     sf::Clock clock;
@@ -37,6 +40,7 @@ int main()
     while (window.isOpen())
     {
         float deltaTime = clock.restart().asSeconds();
+
         // SFML 3: pollEvent() returns std::optional<sf::Event>
         while (auto event = window.pollEvent())
         {
@@ -62,9 +66,41 @@ int main()
                     map.handleEvent(*event, &CurrentScreen);
                     break;
                 case 4:
-                    game.handleEvent(*event, &CurrentScreen);
+                    shop.handleEvent(*event, &CurrentScreen);
+                    break;
+                case 5:
+                    lvl1.handleEvent(*event, &CurrentScreen);
                     break;
             }
+        }
+
+        // Sprawdź czy zmienił się ekran i zaktualizuj slot zapisu
+        if (PreviousScreen != CurrentScreen) {
+            if (PreviousScreen == 2 && CurrentScreen == 3) {
+                // Przejście z SaveScreen do GameMap
+                int slot = saveScreen.getSelectedSaveSlot();
+                map.setSaveSlot(slot);
+
+            } else if (PreviousScreen == 3 && CurrentScreen == 4) {
+                // Przejście z GameMap do ShopInGame (poziom 0)
+                int slot = map.getSaveSlot();
+
+                // KROK 1: Wczytaj dane gry (aby pobrać aktualny złom)
+                lvl1.setSaveSlot(slot); // To wczyta save*.dat
+
+                // KROK 2: Wczytaj dane sklepu
+                shop.setSaveSlot(slot); // To wczyta shop*.dat
+
+                // KROK 3: Synchronizuj złom z gry do sklepu
+                shop.setPlayerScrap(lvl1.getScrap());
+
+            } else if (PreviousScreen == 3 && CurrentScreen == 5) {
+                // Przejście z GameMap do GameScreen (poziomy 1-12)
+                int slot = map.getSaveSlot();
+                lvl1.setSaveSlot(slot);
+
+            }
+            PreviousScreen = CurrentScreen; // Zapisz nowy ekran
         }
 
         window.clear();
@@ -82,8 +118,11 @@ int main()
                 map.draw(window);
                 break;
             case 4:
-                game.update(deltaTime, window.getSize());
-                game.draw(window);
+                shop.draw(window);
+                break;
+             case 5:
+                lvl1.update(deltaTime, window.getSize());
+                lvl1.draw(window);
                 break;
         }
         window.display();

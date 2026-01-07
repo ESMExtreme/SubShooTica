@@ -12,12 +12,15 @@ public:
     void draw(sf::RenderWindow& window);
     void CreateTile(const std::string& string, sf::Color color, sf::Vector2f position, int index, int fontSize);
     void handleEvent(const sf::Event& event, int* currentScreen);
+    void setSaveSlot(int slot) { currentSaveSlot = slot; }
+    int getSaveSlot() const { return currentSaveSlot; }
 private:
     sf::Texture backgroundTexture;
     std::optional<sf::Sprite> background;
     sf::Font font;
     std::vector<sf::Text> tiles;
     int selectedIndex;
+    int currentSaveSlot;
 };
 
 #endif // GAMEMAP_H
