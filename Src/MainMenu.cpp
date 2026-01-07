@@ -62,7 +62,7 @@ void MainMenu::keyPressHandler(const Event::KeyPressed* key, int* currentScreen)
         {
         case 0:
             // Start Game selected
-            // Implement game start logic here
+            *currentScreen = 2; // Zmień CurrentScreen na 2
             break;
         case 1:
             // Options selected
