@@ -21,7 +21,9 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
 )
 add_executable(main ${PROJECT_SOURCES}
         Src/GameScreen.h
-        Src/GameScreen.cpp)
+        Src/GameScreen.cpp
+        Src/GameMap.cpp
+        Src/GameMap.h)
 
 target_compile_features(main PRIVATE cxx_std_17)
 
@@ -57,6 +59,22 @@ if(OPTION_FILE)
         add_custom_command(TARGET main POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_option}" "$<TARGET_FILE_DIR:main>/Assets"
             COMMENT "Copying options.txt to runtime output"
+        )
+    endforeach()
+endif()
+
+file(GLOB_RECURSE MEDIA_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Media/*")
+
+if(MEDIA_FILES)
+    # Ensure destination directory exists
+    add_custom_command(TARGET main POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/Assets/Media"
+    )
+    # Copy each media file to the runtime output directory
+    foreach(_media ${MEDIA_FILES})
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_media}" "$<TARGET_FILE_DIR:main>/Assets/Media"
+            COMMENT "Copying media ${_media} to runtime output"
         )
     endforeach()
 endif()

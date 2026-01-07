@@ -4,10 +4,11 @@
 #include "MainMenu.h"
 #include "OptionsMenu.h"
 #include "SaveScreen.h"
+#include "GameMap.h"
 
 using namespace sf;
 using namespace std;
-int CurrentScreen = 0; // 0 - MainMenu, 1 - OptionsMenu , 2 - SaveScreen , 3-Game
+int CurrentScreen = 0; // 0 - MainMenu, 1 - OptionsMenu , 2 - SaveScreen , 3-Mapa, 4-GameScreen
 
 int main()
 {
@@ -15,6 +16,8 @@ int main()
 	OptionsMenu optionsMenu;
     SaveScreen saveScreen;
     GameScreen game;
+    GameMap map;
+
     sf::Clock clock;
 
     if (optionsMenu.optionsList.fullscreen) {
@@ -56,6 +59,9 @@ int main()
                     }
                     break;
                 case 3:
+                    map.handleEvent(*event, &CurrentScreen);
+                    break;
+                case 4:
                     game.handleEvent(*event, &CurrentScreen);
                     break;
             }
@@ -73,6 +79,9 @@ int main()
                 saveScreen.draw(window);
                 break;
             case 3:
+                map.draw(window);
+                break;
+            case 4:
                 game.update(deltaTime, window.getSize());
                 game.draw(window);
                 break;
