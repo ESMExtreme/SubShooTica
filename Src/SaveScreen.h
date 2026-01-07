@@ -7,7 +7,7 @@ class SaveScreen {
 public:
     SaveScreen();
     void draw(sf::RenderWindow& window);
-    void CreateTile(std::string string, sf::Color color, sf::Vector2f position,int index);
+    void CreateTile(std::string string, sf::Color color, sf::Vector2f position,int index, int fontSize);
     void keyPressHandler(const sf::Event::KeyPressed* key, int* currentScreen);
 private:
     sf::Font font;

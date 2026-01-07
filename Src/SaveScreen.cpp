@@ -8,16 +8,17 @@ SaveScreen::SaveScreen() {
     }
 
     // Utworzenie przycisków zapisu
-    CreateTile("Zapis 1", sf::Color::Red, { 400, 200 }, 0);
-    CreateTile("Zapis 2", sf::Color::White, { 400, 350 }, 1);
-    CreateTile("Zapis 3", sf::Color::White, { 400, 500 }, 2);
-    CreateTile("Back", sf::Color::White, { 400, 650 }, 3);
+    CreateTile("Zapis 1", sf::Color::Red, { 400, 200 }, 0, 70);
+    CreateTile("Zapis 2", sf::Color::White, { 400, 350 }, 1, 70);
+    CreateTile("Zapis 3", sf::Color::White, { 400, 500 }, 2, 70);
+    CreateTile("Back", sf::Color::White, { 400, 650 }, 3, 70);
 
     selectedItemIndex = 0; // start with first item selected
 }
-void SaveScreen::CreateTile(std::string string, sf::Color color, sf::Vector2f position, int index) {
+void SaveScreen::CreateTile(std::string string, sf::Color color, sf::Vector2f position, int index, int fontSize) {
     sf::Text text(font);
     text.setString(string);
+    text.setCharacterSize(fontSize);
     text.setFillColor(color);
     text.setPosition(position);
     saveMenu.push_back(text);
