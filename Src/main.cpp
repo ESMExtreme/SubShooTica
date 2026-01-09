@@ -1,4 +1,7 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Audio.hpp>
 
 #include "GameScreen.h"
 #include "MainMenu.h"
@@ -15,13 +18,15 @@ int PreviousScreen = 0; // Śledź poprzedni ekran
 int main()
 {
     sf::RenderWindow window;
+    sf::Music menuMusic;
+
 	OptionsMenu optionsMenu;
     SaveScreen saveScreen;
     ShopInGame shop;
     GameScreen lvl1;
     GameMap map;
 
-    sf::Clock clock;
+    sf::Clock clock; 
 
     if (optionsMenu.optionsList.fullscreen) {
         window.create(sf::VideoMode(optionsMenu.optionsList.resolution), "SubShootica", Style::None, State::Fullscreen);
@@ -44,7 +49,7 @@ int main()
         // SFML 3: pollEvent() returns std::optional<sf::Event>
         while (auto event = window.pollEvent())
         {
-            if (event->is<sf::Event::Closed>())
+            if (event->is<sf::Event::Closed>()) 
                 window.close();
             switch (CurrentScreen) {
                 case 0:

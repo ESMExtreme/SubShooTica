@@ -27,7 +27,11 @@ add_executable(main ${PROJECT_SOURCES}
 
 target_compile_features(main PRIVATE cxx_std_17)
 
-target_link_libraries(main PRIVATE SFML::Graphics)
+target_link_libraries(main PRIVATE
+    SFML::Graphics
+    SFML::Audio
+)
+
 
 # --- Assets / Fonts handling ---
 # Place your font files in: <repo-root>/Assets/Fonts/*.ttf (or other font extensions)
@@ -75,6 +79,22 @@ if(MEDIA_FILES)
         add_custom_command(TARGET main POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_media}" "$<TARGET_FILE_DIR:main>/Assets/Media"
             COMMENT "Copying media ${_media} to runtime output"
+        )
+    endforeach()
+endif()
+
+file(GLOB_RECURSE AUDIO_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Audio/*")
+
+if(AUDIO_FILES)
+    # Ensure destination directory exists
+    add_custom_command(TARGET main POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/Assets/Audio"
+    )
+    # Copy each audio file to the runtime output directory
+    foreach(_audio ${AUDIO_FILES})
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_audio}" "$<TARGET_FILE_DIR:main>/Assets/Audio"
+            COMMENT "Copying audio ${_audio} to runtime output"
         )
     endforeach()
 endif()
