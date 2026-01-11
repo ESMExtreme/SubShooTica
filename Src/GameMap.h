@@ -14,6 +14,7 @@ public:
     void handleEvent(const sf::Event& event, int* currentScreen);
     void setSaveSlot(int slot) { currentSaveSlot = slot; }
     int getSaveSlot() const { return currentSaveSlot; }
+    int getSelectedLevel() const { return selectedIndex; }
 private:
     sf::Texture backgroundTexture;
     std::optional<sf::Sprite> background;

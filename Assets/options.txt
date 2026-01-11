@@ -1,5 +1,6 @@
-resolutionW: 1920
-resolutionH: 1080
-fullscreen: 1
-vsync: 1
-fps_limit: 120
+resolutionW:1920
+resolutionH:1080
+fullscreen:0
+vsync:0
+fps_limit:120
+music_volume:0

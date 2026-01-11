@@ -14,10 +14,12 @@ public:
     bool fullscreen = true;
     bool vsync = true;
     int fpsLimit = 60;
+    int musicVolume = 50; 
+    int sfxVolume = 50;
 };
 class OptionsMenu {
 public:
-    OptionsMenu();
+    OptionsMenu(sf::Music* music);
     void draw(sf::RenderWindow& window);
     void MoveUp();
     void MoveDown();
@@ -28,6 +30,7 @@ public:
     Options optionsList;
     void keyPressHandler(const sf::Event::KeyPressed* key, int* currentScreen);
 private:
+    sf::Music* musicPtr;
     sf::Font font;
     std::vector<sf::Text> optionsMenu;
     int selectedItemIndex;

@@ -5,7 +5,24 @@
 #include <random>
 #include <cmath>
 
-GameScreen::GameScreen() : currentSaveSlot(0) {
+GameScreen::GameScreen() : sprite(texture), currentSaveSlot(0) {
+
+    // Inicjalizacja tła
+    std::vector<std::string> backgroundFiles = {
+    "Assets/Media/background1.png"
+    };
+    int bgIndex = 0;
+    if (!background_1.texture.loadFromFile(backgroundFiles[bgIndex])) {
+        // handle error
+        std::cout << "Blad ladowania tekstury tla: " << backgroundFiles[bgIndex] << std::endl;
+    } else {
+        background_1.sprite.setTexture(background_1.texture);
+    }
+    // Make background scroll more visible
+    background_1.scrollSpeed = 150.f;
+    
+
+    // Inicjalizacja piłki
     ball.setRadius(20.f);
     ball.setFillColor(sf::Color::Blue);
     ball.setPosition(sf::Vector2f(900.f, 900.f));
@@ -55,6 +72,12 @@ void GameScreen::handleEvent(const sf::Event& event, int* currentScreen) {
 }
 
 void GameScreen::update(float deltaTime, sf::Vector2u windowSize) {
+     // Aktualizacja tła
+    background_1.offsetY += background_1.scrollSpeed * deltaTime;
+    if (background_1.offsetY >= background_1.getHeight()) {
+        background_1.offsetY = 0.f;
+    }
+
     ball.move(velocity * deltaTime);
 
     // Aktualizacja pocisków
@@ -134,6 +157,30 @@ void GameScreen::update(float deltaTime, sf::Vector2u windowSize) {
 }
 
 void GameScreen::draw(sf::RenderWindow& window) {
+    sf::Vector2u windowSize = window.getSize();
+
+    // Rysuj tło
+    if (background_1.texture.getSize().x > 0 && background_1.texture.getSize().y > 0) {
+        std::cout << "[DEBUG] draw: texSize=" << background_1.texture.getSize().x << "x" << background_1.texture.getSize().y
+                  << " offsetY=" << background_1.offsetY << " scrollSpeed=" << background_1.scrollSpeed << std::endl;
+        // Scale uniformly to match window width (preserve aspect ratio)
+        float texW = static_cast<float>(background_1.texture.getSize().x);
+        float texH = static_cast<float>(background_1.texture.getSize().y);
+        float scale = static_cast<float>(windowSize.x) / texW;
+        background_1.sprite.setScale(sf::Vector2f(scale, scale));
+
+        // Rysuj pierwszą część tła (pozycja w pikselach tekstury przeskalowana przez 'scale')
+        background_1.sprite.setPosition(sf::Vector2f(0.f, background_1.offsetY * scale));
+        window.draw(background_1.sprite);
+
+        // Rysuj drugą część dla płynnego przewijania
+        if (background_1.offsetY > 0) {
+            background_1.sprite.setPosition(sf::Vector2f(0.f, (background_1.offsetY - background_1.getHeight()) * scale));
+            window.draw(background_1.sprite);
+        }
+    }
+    
+
     window.draw(ball);
     for (const auto& bullet : bullets) {
         window.draw(bullet.shape);
@@ -175,4 +222,60 @@ void GameScreen::loadGame() {
 void GameScreen::saveGame() {
     std::string filename = getSaveFileName();
     saveData.saveToFile(filename);
+}
+
+void GameScreen::setLevel(int level) {
+    background_1.difficultyLevel = level;
+    std::string bgFile = "Assets/Media/background" + std::to_string(level) + ".png";
+    std::cout << "[DEBUG] setLevel: loading " << bgFile << std::endl;
+    if (!background_1.texture.loadFromFile(bgFile)) {
+        std::cout << "[DEBUG] Error loading background: " << bgFile << std::endl;
+        // try default background1
+        if (level != 1) {
+            std::string fallback = "Assets/Media/background1.png";
+            if (background_1.texture.loadFromFile(fallback)) {
+                background_1.sprite.setTexture(background_1.texture);
+                background_1.offsetY = 0.f;
+                std::cout << "[DEBUG] Fallback background loaded: " << fallback << std::endl;
+            }
+        }
+    } else {
+        // std::cout << "[DEBUG] Background loaded, size: " << background_1.texture.getSize().x << "x" << background_1.texture.getSize().y << std::endl;
+        // dodatkowa diagnostyka obrazu
+        sf::Image img;
+        if (img.loadFromFile(bgFile)) {
+            const sf::Vector2u sz = img.getSize();
+            uint64_t sum = 0;
+            unsigned int minv = 255, maxv = 0;
+            const unsigned char* px = img.getPixelsPtr();
+            size_t count = sz.x * sz.y;
+            for (size_t i = 0; i < count; ++i) {
+                unsigned int r = px[i*4+0];
+                unsigned int g = px[i*4+1];
+                unsigned int b = px[i*4+2];
+                unsigned int v = (r + g + b) / 3;
+                sum += v;
+                if (v < minv) minv = v;
+                if (v > maxv) maxv = v;
+            }
+            double avg = static_cast<double>(sum) / static_cast<double>(count);
+            std::cout << "[DEBUG] Image stats: avg=" << avg << " min=" << minv << " max=" << maxv << " (" << sz.x << "x" << sz.y << ")" << std::endl;
+            // sample some pixels
+            auto sample = [&](unsigned int sx, unsigned int sy){
+                if (sx < sz.x && sy < sz.y) {
+                    sf::Color c = img.getPixel(sf::Vector2u(sx, sy));
+                    std::cout << "[DEBUG] sample("<<sx<<","<<sy<<")="<<(int)c.r<<","<<(int)c.g<<","<<(int)c.b<<"\n";
+                }
+            };
+            sample(0,0);
+            sample(sz.x/2, sz.y/4);
+            sample(sz.x/2, sz.y/2);
+            sample(sz.x/2, (sz.y*3)/4);
+            sample(sz.x-1, sz.y-1);
+        }
+        background_1.sprite.setTexture(background_1.texture);
+        background_1.sprite.setTextureRect(sf::IntRect(sf::Vector2i(0,0), sf::Vector2i(static_cast<int>(background_1.texture.getSize().x), static_cast<int>(background_1.texture.getSize().y))));
+        background_1.sprite.setOrigin(sf::Vector2f(0.f, 0.f));
+        background_1.offsetY = 0.f;
+    }
 }

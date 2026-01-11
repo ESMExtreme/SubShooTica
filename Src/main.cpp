@@ -20,7 +20,7 @@ int main()
     sf::RenderWindow window;
     sf::Music menuMusic;
 
-	OptionsMenu optionsMenu;
+	OptionsMenu optionsMenu(&menuMusic);
     SaveScreen saveScreen;
     ShopInGame shop;
     GameScreen lvl1;
@@ -28,13 +28,15 @@ int main()
 
     sf::Clock clock; 
 
+    menuMusic.setVolume(static_cast<float>(optionsMenu.optionsList.musicVolume));
+
     if (optionsMenu.optionsList.fullscreen) {
         window.create(sf::VideoMode(optionsMenu.optionsList.resolution), "SubShootica", Style::None, State::Fullscreen);
     }
     else {
         window.create(sf::VideoMode(optionsMenu.optionsList.resolution), "SubShootica", Style::Close | Style::Titlebar, State::Windowed);
 	}
-    MainMenu menu(window.getSize().x, window.getSize().y);
+    MainMenu menu(window.getSize().x, window.getSize().y, menuMusic);
     if (optionsMenu.optionsList.vsync) {
         window.setVerticalSyncEnabled(true);
     }
@@ -103,6 +105,7 @@ int main()
                 // Przejście z GameMap do GameScreen (poziomy 1-12)
                 int slot = map.getSaveSlot();
                 lvl1.setSaveSlot(slot);
+                lvl1.setLevel(map.getSelectedLevel());
 
             }
             PreviousScreen = CurrentScreen; // Zapisz nowy ekran

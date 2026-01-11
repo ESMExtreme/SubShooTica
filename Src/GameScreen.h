@@ -1,11 +1,22 @@
-#ifndef GAMESCREEN_H
-#define GAMESCREEN_H
+ #ifndef GAMESCREEN_H
+ #define GAMESCREEN_H
 
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <random>
 #include <optional>
 #include "SaveData.h"
+
+struct Background {
+    sf::Texture texture;
+    sf::Sprite sprite;
+    float offsetY = 0.f;
+    float scrollSpeed = 150.f;
+    int difficultyLevel = 1;
+
+    Background() : sprite(texture) {}
+    float getHeight() const { return texture.getSize().y; }
+};
 
 struct Bullet {
     sf::CircleShape shape;
@@ -28,8 +39,13 @@ public:
     void loadGame();
     void saveGame();
     int getScrap() const { return saveData.scrap; }
+    void setLevel(int level);
 
 private:
+    Background background_1;
+    sf::Texture texture;
+    sf::Sprite sprite;
+
     sf::CircleShape ball;
     sf::Vector2f velocity;
     std::vector<Bullet> bullets;

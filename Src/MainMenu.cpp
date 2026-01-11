@@ -8,7 +8,7 @@ using namespace sf;
 using namespace std;
 
 
-MainMenu::MainMenu(float width, float height)
+MainMenu::MainMenu(float width, float height, sf::Music& music) : menuMusic(music)
 {
     // ensure the font path matches what you copy in CMake (example: Assets/Fonts/arial.ttf)
     if (!font.openFromFile("Assets/Fonts/BerlinSans.ttf"))
@@ -21,8 +21,7 @@ MainMenu::MainMenu(float width, float height)
          std::ofstream log("log.txt", std::ios::app); // w build/bin jest log.txt
         log << "Blad ladowania muzyki" << std::endl;
     } else {
-    // menuMusic.setLoop(true);
-    menuMusic.setVolume(100);
+    menuMusic.setLooping(true);
     menuMusic.play();
     std::ofstream log("log.txt", std::ios::app); // w build/bin jest log.txt
     log << "Muzyka załadowana OK" << std::endl;
