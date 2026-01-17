@@ -6,7 +6,8 @@ Hola
 2. Pobieramy Cmake
 3. Pobieramy repozytorium
 4. Otwieramy projekt w VS (jako folder) i czekamy na instalacje poprzez Cmake
-----ALBO----
+   
+   -ALBO-
 1. pobieramy repozytorium
 2. otwieramy folder w CLion (oferuje on 30 dni probne)
 
