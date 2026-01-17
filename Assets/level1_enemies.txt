@@ -1,0 +1,36 @@
+# Konfiguracja przeciwników dla Poziomu 1
+# Format: parametr:wartość
+
+# Spawning ogólny
+spawn_interval:2.0
+max_enemies:10
+
+# ===== PRZECIWNIK 1: Fish3.png =====
+enemy1_type:texture
+enemy1_texture:Assets/Media/fish3.png
+enemy1_hp:1
+enemy1_speed:100.0
+enemy1_size_x:80.0
+enemy1_size_y:60.0
+enemy1_scrap_reward:10
+enemy1_spawn_weight:1
+
+# ===== PRZECIWNIK 2: Fish.png =====
+enemy2_type:texture
+enemy2_texture:Assets/Media/fish.png
+enemy2_hp:1
+enemy2_speed:100.0
+enemy2_size_x:60.0
+enemy2_size_y:60.0
+enemy2_scrap_reward:10
+enemy2_spawn_weight:1
+
+# ===== PRZECIWNIK 3: Fish2.png =====
+enemy3_type:texture
+enemy3_texture:Assets/Media/fish2.png
+enemy3_hp:1
+enemy3_speed:100.0
+enemy3_size_x:70.0
+enemy3_size_y:70.0
+enemy3_scrap_reward:10
+enemy3_spawn_weight:1

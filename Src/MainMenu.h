@@ -4,6 +4,7 @@
 #include <SFML/Audio.hpp>
 #include <vector>
 #include <string>
+#include <optional>
 
 
 
@@ -23,4 +24,12 @@ class MainMenu
     int selectedItemIndex;
     void MoveUp();
     void MoveDown();
+
+    // Tło menu
+    sf::Texture backgroundTexture;
+    std::optional<sf::Sprite> backgroundSprite;
+
+    // Obrazek menu.png na wierzchu
+    sf::Texture menuTexture;
+    std::optional<sf::Sprite> menuSprite;
 };

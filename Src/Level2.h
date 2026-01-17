@@ -1,37 +1,39 @@
- #ifndef GAMESCREEN_H
- #define GAMESCREEN_H
+ #ifndef LEVEL2_H
+ #define LEVEL2_H
 
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <random>
 #include <optional>
 #include "SaveData.h"
+#include "EnemyConfig.h"
 
-struct Background {
+struct Background2 {
     sf::Texture texture;
     sf::Sprite sprite;
     float offsetY = 0.f;
     float scrollSpeed = 150.f;
-    int difficultyLevel = 1;
+    int difficultyLevel = 2;
 
-    Background() : sprite(texture) {}
+    Background2() : sprite(texture) {}
     float getHeight() const { return texture.getSize().y; }
 };
 
-struct Bullet {
+struct Bullet2 {
     sf::CircleShape shape;
     sf::Vector2f velocity;
 };
 
-struct Enemy {
+struct Enemy2 {
     sf::RectangleShape shape;
     sf::Vector2f velocity;
+    int hp = 1; // HP przeciwnika
 };
 
-class GameScreen {
+class Level2 {
 public:
-    GameScreen();
-    ~GameScreen() = default;
+    Level2();
+    ~Level2() = default;
     void handleEvent(const sf::Event& event, int* currentScreen);
     void update(float deltaTime, sf::Vector2u windowSize);
     void draw(sf::RenderWindow& window);
@@ -39,18 +41,19 @@ public:
     void loadGame();
     void saveGame();
     int getScrap() const { return saveData.scrap; }
+    SaveData* getSaveData() { return &saveData; }
     void setLevel(int level);
 
 private:
-    Background background_1;
+    Background2 background_1;
     sf::Texture texture;
     sf::Sprite sprite;
 
     sf::CircleShape ball;
     sf::Vector2f velocity;
-    std::vector<Bullet> bullets;
+    std::vector<Bullet2> bullets;
     sf::Vector2f bulletVelocity;
-    std::vector<Enemy> enemies;
+    std::vector<Enemy2> enemies;
     float enemySpawnTimer;
     std::mt19937 rng;
     std::uniform_real_distribution<float> distX;
@@ -63,7 +66,12 @@ private:
     sf::Font font;
     std::optional<sf::Text> scrapText;
 
+    // Konfiguracja przeciwników
+    EnemyConfig enemyConfig;
+
     std::string getSaveFileName() const;
+    void loadEnemyConfig(int level);
 };
 
-#endif // GAMESCREEN_H
+#endif // LEVEL2_H
+

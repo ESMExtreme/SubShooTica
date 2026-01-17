@@ -1,0 +1,20 @@
+# Konfiguracja przeciwników dla Poziomu 2
+# Format: parametr:wartość
+
+# Spawning
+spawn_interval:1.5
+max_enemies:15
+
+# Statystyki wroga
+enemy_hp:2
+enemy_speed:120.0
+enemy_size_x:30.0
+enemy_size_y:30.0
+enemy_color_r:255
+enemy_color_g:165
+enemy_color_b:0
+# Kolor: R=255, G=165, B=0 = Pomarańczowy
+
+# Nagrody
+scrap_reward:15
+

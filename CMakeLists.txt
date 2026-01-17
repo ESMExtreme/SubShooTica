@@ -20,10 +20,14 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
 
 )
 add_executable(main ${PROJECT_SOURCES}
-        Src/GameScreen.h
-        Src/GameScreen.cpp
+        Src/Level1.h
+        Src/Level1.cpp
+        Src/Level2.h
+        Src/Level2.cpp
         Src/GameMap.cpp
-        Src/GameMap.h)
+        Src/GameMap.h
+        Src/Level1.cpp
+        Src/Level1.cpp)
 
 target_compile_features(main PRIVATE cxx_std_17)
 
@@ -67,6 +71,32 @@ if(OPTION_FILE)
     endforeach()
 endif()
 
+# --- JSON save files handling ---
+# Copy save*.json files
+file(GLOB JSON_SAVE_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/save*.json")
+if(JSON_SAVE_FILES)
+    foreach(_json ${JSON_SAVE_FILES})
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_json}" "$<TARGET_FILE_DIR:main>/Assets"
+            COMMENT "Copying JSON save ${_json} to runtime output"
+        )
+    endforeach()
+endif()
+
+# --- Map backgrounds handling ---
+# Copy Map directory with locked/unlocked subdirectories
+file(GLOB_RECURSE MAP_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Media/Map/*")
+if(MAP_FILES)
+    foreach(_map ${MAP_FILES})
+        get_filename_component(_map_dir "${_map}" DIRECTORY)
+        file(RELATIVE_PATH _rel_dir "${ASSETS_DIR}/Media" "${_map_dir}")
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_map}" "$<TARGET_FILE_DIR:main>/Assets/Media/${_rel_dir}"
+            COMMENT "Copying map background ${_map} to runtime output"
+        )
+    endforeach()
+endif()
+
 file(GLOB_RECURSE MEDIA_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Media/*")
 
 if(MEDIA_FILES)
@@ -98,3 +128,17 @@ if(AUDIO_FILES)
         )
     endforeach()
 endif()
+
+# --- Enemy config files handling ---
+# Copy level enemy configuration files (level1_enemies.txt, level2_enemies.txt, etc.)
+file(GLOB ENEMY_CONFIG_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/level*_enemies.txt")
+if(ENEMY_CONFIG_FILES)
+    foreach(_config ${ENEMY_CONFIG_FILES})
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_config}" "$<TARGET_FILE_DIR:main>/Assets"
+            COMMENT "Copying enemy config ${_config} to runtime output"
+        )
+    endforeach()
+endif()
+
+# --- Audio handling ---

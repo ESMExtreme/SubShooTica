@@ -21,11 +21,8 @@ public:
     void handleEvent(const sf::Event& event, int* currentScreen);
     void update(float deltaTime, sf::Vector2u windowSize);
     void draw(sf::RenderWindow& window);
-    void setSaveSlot(int slot);
-    void loadShopData();
-    void saveShopData();
-    void setPlayerScrap(int scrap) { playerScrap = scrap; }
-    int getPlayerScrap() const { return playerScrap; }
+    void setSaveSlot(int slot) { currentSaveSlot = slot; }
+    void loadFromSaveData(SaveData* saveDataPtr);
 
 private:
     sf::Font font;
@@ -36,12 +33,11 @@ private:
     std::optional<sf::Text> scrapText;
     int selectedIndex;
     int currentSaveSlot;
-    int playerScrap;
+    SaveData* saveData;
 
     void createShopItems();
     void updateDisplay();
     void purchaseItem();
-    std::string getSaveFileName() const;
 };
 
 #endif // SHOPINGAME_H

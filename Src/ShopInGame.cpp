@@ -1,14 +1,7 @@
 #include "ShopInGame.h"
-#include <iostream>
-#include <fstream>
-#include <string>
 
-ShopInGame::ShopInGame() : selectedIndex(0), currentSaveSlot(0), playerScrap(0),
-                           titleText(), scrapText() {
-    // Załaduj czcionkę
-    if (!font.openFromFile("Assets/Fonts/BerlinSans.ttf")) {
-        std::cerr << "Błąd: Nie można załadować czcionki dla sklepu" << std::endl;
-    }
+ShopInGame::ShopInGame() : selectedIndex(0), currentSaveSlot(0), saveData(nullptr), titleText(), scrapText() {
+    font.openFromFile("Assets/Fonts/BerlinSans.ttf");
 
     // Tytuł sklepu
     titleText.emplace(font);
@@ -22,7 +15,6 @@ ShopInGame::ShopInGame() : selectedIndex(0), currentSaveSlot(0), playerScrap(0),
     scrapText->setCharacterSize(40);
     scrapText->setFillColor(sf::Color::Green);
     scrapText->setPosition(sf::Vector2f(50.f, 50.f));
-
 
     createShopItems();
 }
@@ -65,8 +57,8 @@ void ShopInGame::createShopItems() {
 }
 
 void ShopInGame::updateDisplay() {
-    if (scrapText.has_value()) {
-        scrapText->setString("Zlom: " + std::to_string(playerScrap));
+    if (scrapText.has_value() && saveData) {
+        scrapText->setString("Zlom: " + std::to_string(saveData->scrap));
     }
 
     for (size_t i = 0; i < items.size(); ++i) {
@@ -102,28 +94,38 @@ void ShopInGame::handleEvent(const sf::Event& event, int* currentScreen) {
             selectedIndex = (selectedIndex + 1) % items.size();
             updateDisplay();
         } else if (key->code == Key::Enter) {
-            // Enter tylko kupuje przedmioty
             purchaseItem();
         } else if (key->code == Key::Escape) {
-            saveShopData(); // Zapisz stan sklepu
+            // Zapisz wszystkie zmiany do pliku JSON przed wyjściem ze sklepu
+            if (saveData) {
+                std::string saveFile = "Assets/save" + std::to_string(currentSaveSlot) + ".json";
+                bool success = saveData->saveToFile(saveFile);
+                // Debug: sprawdź czy zapisywanie się powiodło
+                if (!success) {
+                    // Można dodać logowanie błędu
+                }
+            }
             *currentScreen = *currentScreen - 1; // Wróć do poprzedniego ekranu
         }
     }
 }
 
 void ShopInGame::purchaseItem() {
+    if (!saveData) return;
+
     if (selectedIndex >= 0 && selectedIndex < static_cast<int>(items.size())) {
         ShopItem& item = items[selectedIndex];
 
-        if (!item.purchased && playerScrap >= item.price) {
+        if (!item.purchased && saveData->scrap >= item.price) {
             item.purchased = true;
-            playerScrap -= item.price;
+            saveData->scrap -= item.price;
+            // Zapisz do SaveData
+            if (selectedIndex < static_cast<int>(saveData->shopItemsPurchased.size())) {
+                saveData->shopItemsPurchased[selectedIndex] = true;
+            }
+            // Natychmiast zapisz do pliku JSON po zakupie
+            saveData->saveToFile("Assets/save" + std::to_string(currentSaveSlot) + ".json");
             updateDisplay();
-            std::cout << "Kupiono: " << item.name << std::endl;
-        } else if (item.purchased) {
-            std::cout << "Przedmiot już kupiony!" << std::endl;
-        } else {
-            std::cout << "Za mało pieniędzy!" << std::endl;
         }
     }
 }
@@ -155,55 +157,17 @@ void ShopInGame::draw(sf::RenderWindow& window) {
     }
 }
 
-std::string ShopInGame::getSaveFileName() const {
-    return "Assets/shop" + std::to_string(currentSaveSlot) + ".dat";
-}
+void ShopInGame::loadFromSaveData(SaveData* saveDataPtr) {
+    saveData = saveDataPtr;
 
-void ShopInGame::setSaveSlot(int slot) {
-    currentSaveSlot = slot;
-    loadShopData();
-}
+    if (!saveData) return;
 
-void ShopInGame::loadShopData() {
-    std::string filename = getSaveFileName();
-    std::ifstream file(filename);
-
-    if (file.is_open()) {
-        // NIE wczytuj pieniędzy - są tylko w save*.dat!
-        // Wczytaj wszystkie przedmioty (5 przedmiotów, bez START GAME)
-        for (size_t i = 0; i < items.size(); ++i) {
-            int purchased;
-            file >> purchased;
-            items[i].purchased = (purchased == 1);
-        }
-        file.close();
-        std::cout << "Wczytano dane sklepu z: " << filename << std::endl;
-    } else {
-        // Nowy sklep - domyślne wartości
-        // playerScrap pozostaje jak jest (z save*.dat przez setPlayerScrap)
-        for (auto& item : items) {
-            item.purchased = false;
-        }
-        std::cout << "Nowy sklep dla slotu " << currentSaveSlot << std::endl;
+    // Wczytaj stan zakupów ze SaveData
+    for (size_t i = 0; i < items.size() && i < saveData->shopItemsPurchased.size(); ++i) {
+        items[i].purchased = saveData->shopItemsPurchased[i];
     }
 
     updateDisplay();
 }
 
-void ShopInGame::saveShopData() {
-    std::string filename = getSaveFileName();
-    std::ofstream file(filename);
-
-    if (file.is_open()) {
-        // NIE zapisuj pieniędzy - są tylko w save*.dat!
-        // Zapisz wszystkie przedmioty (5 przedmiotów, bez START GAME)
-        for (size_t i = 0; i < items.size(); ++i) {
-            file << (items[i].purchased ? 1 : 0) << "\n";
-        }
-        file.close();
-        std::cout << "Zapisano dane sklepu do: " << filename << std::endl;
-    } else {
-        std::cerr << "Błąd: Nie można zapisać danych sklepu do: " << filename << std::endl;
-    }
-}
 

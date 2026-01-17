@@ -3,7 +3,8 @@
 #include <SFML/System.hpp>
 #include <SFML/Audio.hpp>
 
-#include "GameScreen.h"
+#include "Level1.h"
+#include "Level2.h"
 #include "MainMenu.h"
 #include "OptionsMenu.h"
 #include "SaveScreen.h"
@@ -12,8 +13,9 @@
 
 using namespace sf;
 using namespace std;
-int CurrentScreen = 0; // 0 - MainMenu, 1 - OptionsMenu , 2 - SaveScreen , 3-Mapa, 4-GameScreen
+int CurrentScreen = 0; // 0 - MainMenu, 1 - OptionsMenu , 2 - SaveScreen , 3-Mapa, 4-ShopInGame, 5-Poziomy
 int PreviousScreen = 0; // Śledź poprzedni ekran
+int currentLevel = 0; // Aktualnie wybrany poziom (0=sklep, 1=level1, 2=level2, itd.)
 
 int main()
 {
@@ -23,7 +25,8 @@ int main()
 	OptionsMenu optionsMenu(&menuMusic);
     SaveScreen saveScreen;
     ShopInGame shop;
-    GameScreen lvl1;
+    Level1 lvl1;
+    Level2 lvl2;
     GameMap map;
 
     sf::Clock clock; 
@@ -76,7 +79,14 @@ int main()
                     shop.handleEvent(*event, &CurrentScreen);
                     break;
                 case 5:
-                    lvl1.handleEvent(*event, &CurrentScreen);
+                    // Obsługa zdarzeń dla odpowiedniego poziomu
+                    if (currentLevel == 1) {
+                        lvl1.handleEvent(*event, &CurrentScreen);
+                    } else if (currentLevel == 2) {
+                        lvl2.handleEvent(*event, &CurrentScreen);
+                    } else {
+                        lvl1.handleEvent(*event, &CurrentScreen);
+                    }
                     break;
             }
         }
@@ -92,23 +102,57 @@ int main()
                 // Przejście z GameMap do ShopInGame (poziom 0)
                 int slot = map.getSaveSlot();
 
-                // KROK 1: Wczytaj dane gry (aby pobrać aktualny złom)
-                lvl1.setSaveSlot(slot); // To wczyta save*.dat
+                // Wczytaj dane gry (zawiera złom i dane sklepu)
+                lvl1.setSaveSlot(slot);
 
-                // KROK 2: Wczytaj dane sklepu
-                shop.setSaveSlot(slot); // To wczyta shop*.dat
-
-                // KROK 3: Synchronizuj złom z gry do sklepu
-                shop.setPlayerScrap(lvl1.getScrap());
+                // Ustaw slot i wczytaj dane sklepu z SaveData
+                shop.setSaveSlot(slot);
+                shop.loadFromSaveData(lvl1.getSaveData());
 
             } else if (PreviousScreen == 3 && CurrentScreen == 5) {
-                // Przejście z GameMap do GameScreen (poziomy 1-12)
+                // Przejście z GameMap do poziomów (1-12)
                 int slot = map.getSaveSlot();
-                lvl1.setSaveSlot(slot);
-                lvl1.setLevel(map.getSelectedLevel());
+                currentLevel = map.getSelectedLevel();
+
+                // Wybierz odpowiedni poziom
+                if (currentLevel == 1) {
+                    lvl1.setSaveSlot(slot);
+                    lvl1.setLevel(currentLevel);
+                } else if (currentLevel == 2) {
+                    lvl2.setSaveSlot(slot);
+                    lvl2.setLevel(currentLevel);
+                } else {
+                    // Domyślnie poziom 1 dla pozostałych (3-12 można dodać później)
+                    lvl1.setSaveSlot(slot);
+                    lvl1.setLevel(currentLevel);
+                }
 
             }
             PreviousScreen = CurrentScreen; // Zapisz nowy ekran
+        }
+
+        // Sprawdź czy trzeba zastosować nowe ustawienia z OptionsMenu
+        if (optionsMenu.shouldApplySettings) {
+            optionsMenu.shouldApplySettings = false;
+
+            // Zastosuj muzykę
+            menuMusic.setVolume(static_cast<float>(optionsMenu.optionsList.musicVolume));
+
+            // Zastosuj rozdzielczość i fullscreen
+            if (optionsMenu.optionsList.fullscreen) {
+                window.create(sf::VideoMode(optionsMenu.optionsList.resolution), "SubShootica", Style::None, State::Fullscreen);
+            } else {
+                window.create(sf::VideoMode(optionsMenu.optionsList.resolution), "SubShootica", Style::Close | Style::Titlebar, State::Windowed);
+            }
+
+            // Zastosuj VSync lub FPS limit
+            if (optionsMenu.optionsList.vsync) {
+                window.setVerticalSyncEnabled(true);
+                window.setFramerateLimit(0); // Wyłącz limit FPS gdy VSync jest włączony
+            } else {
+                window.setVerticalSyncEnabled(false);
+                window.setFramerateLimit(optionsMenu.optionsList.fpsLimit);
+            }
         }
 
         window.clear();
@@ -129,8 +173,17 @@ int main()
                 shop.draw(window);
                 break;
              case 5:
-                lvl1.update(deltaTime, window.getSize());
-                lvl1.draw(window);
+                // Rysuj odpowiedni poziom
+                if (currentLevel == 1) {
+                    lvl1.update(deltaTime, window.getSize());
+                    lvl1.draw(window);
+                } else if (currentLevel == 2) {
+                    lvl2.update(deltaTime, window.getSize());
+                    lvl2.draw(window);
+                } else {
+                    lvl1.update(deltaTime, window.getSize());
+                    lvl1.draw(window);
+                }
                 break;
         }
         window.display();

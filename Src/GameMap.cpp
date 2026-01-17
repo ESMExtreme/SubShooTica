@@ -2,43 +2,79 @@
 #include <string>
 #include <iostream>
 
-GameMap::GameMap() : backgroundTexture(), font(), tiles(), selectedIndex(0), currentSaveSlot(0)
+GameMap::GameMap() : currentBackgroundTexture(), font(), tiles(), selectedIndex(0), currentSaveSlot(0), saveData()
 {
-    bool loaded = backgroundTexture.loadFromFile("Assets/Media/Mapa.png");
-    if (!loaded) {
-        std::cout << "Błąd: Nie można załadować Assets/Media/Mapa.png" << std::endl;
-    } else {
-        std::cout << "Załadowano  - rozmiar:Mapa.png " << backgroundTexture.getSize().x << "x" << backgroundTexture.getSize().y << std::endl;
-
-        // Utwórz sprite DOPIERO po załadowaniu tekstury
-        background.emplace(backgroundTexture);
-        std::cout << "Sprite utworzony z teksturą!" << std::endl;
-    }
-
     if (!font.openFromFile("Assets/Fonts/BerlinSans.ttf")) {
         std::cout << "Błąd: Nie można załadować czcionki" << std::endl;
     }
 
+    // Tło zostanie załadowane później w setSaveSlot() po wczytaniu SaveData
+
     // Tworzenie 13 tiles z liczbami 0-12 w siatce
     std::vector<sf::Vector2f> positions = {
-        {755.f, 527.f},   // 0
-        {827.f, 416.f},   // 1
-        {931.f, 558.f},   // 2
-        {612.f, 373.f},   // 3
-        {569.f, 476.f},   // 4
-        {442.f, 526.f},  // 5
-        {815.f, 278.f},  // 6
-        {995.f, 288.f},   // 7
-        {1126.f, 469.f},   // 8
-        {831.f, 756.f},   // 9
-        {1117.f, 740.f},   // 10
-        {576.f, 662.f},  // 11
-        {1156.f, 844.f}   // 12
+        {350.f, 50.f},   // 0
+        {150.f, 200.f},  // 1
+        {300.f, 200.f},  // 2
+        {450.f, 200.f},  // 3
+        {600.f, 200.f},  // 4
+        {750.f, 200.f},  // 5
+        {900.f, 200.f},  // 6
+        {150.f, 400.f},  // 7
+        {300.f, 400.f},  // 8
+        {450.f, 400.f},  // 9
+        {600.f, 400.f},  // 10
+        {750.f, 400.f},  // 11
+        {900.f, 400.f}   // 12
     };
 
-    for (int i = 0; i < 13; ++i) {
-        CreateTile(std::to_string(i), sf::Color::Cyan, positions[i], i, 60);
+}
+
+void GameMap::setSaveSlot(int slot) {
+    currentSaveSlot = slot;
+    // Wczytaj dane zapisu
+    std::string saveFile = "Assets/save" + std::to_string(currentSaveSlot) + ".json";
+    if (SaveData::fileExists(saveFile)) {
+        saveData.loadFromFile(saveFile);
     }
+    // Załaduj tło dla obecnie wybranego levelu
+    loadBackground(selectedIndex);
+}
+
+void GameMap::loadBackground(int levelIndex) {
+    std::string backgroundPath;
+
+    // Sprawdź czy level jest odblokowany
+    bool isUnlocked = (levelIndex <= saveData.maxLevelUnlocked);
+
+    // Wybierz odpowiednie tło: U*.png (unlocked) lub L*.png (locked)
+    if (isUnlocked) {
+        backgroundPath = "Assets/Media/Map/unlocked/U" + std::to_string(levelIndex) + ".png";
+    } else {
+        backgroundPath = "Assets/Media/Map/locked/L" + std::to_string(levelIndex) + ".png";
+    }
+
+    std::cout << "Próba załadowania: " << backgroundPath << std::endl;
+    std::cout << "Level " << levelIndex << " unlocked=" << isUnlocked << " maxUnlocked=" << saveData.maxLevelUnlocked << std::endl;
+
+    // WAŻNE: Najpierw usuń stary sprite i teksturę
+    background.reset();
+
+    // Utwórz NOWĄ teksturę (wyczyść starą)
+    sf::Texture newTexture;
+    bool loaded = newTexture.loadFromFile(backgroundPath);
+
+    if (!loaded) {
+        std::cout << "BŁĄD: Nie można załadować " << backgroundPath << std::endl;
+        return;
+    }
+
+    std::cout << "✓ Załadowano tło: " << backgroundPath << " (rozmiar: " << newTexture.getSize().x << "x" << newTexture.getSize().y << ")" << std::endl;
+
+    // Przypisz nową teksturę
+    currentBackgroundTexture = std::move(newTexture);
+
+    // Utwórz NOWY sprite z nową teksturą
+    background.emplace(currentBackgroundTexture);
 }
 
 void GameMap::CreateTile(const std::string& string, sf::Color color, sf::Vector2f position, int index, int fontSize) {
@@ -55,19 +91,18 @@ void GameMap::handleEvent(const sf::Event& event, int* currentScreen) {
         using Key = sf::Keyboard::Key;
         if (key->code == Key::Left) {
             selectedIndex = (selectedIndex - 1 + 13) % 13;
+            loadBackground(selectedIndex); // Załaduj nowe tło dla wybranego levelu
         } else if (key->code == Key::Right) {
             selectedIndex = (selectedIndex + 1) % 13;
+            loadBackground(selectedIndex); // Załaduj nowe tło dla wybranego levelu
         } else if (key->code == Key::Up) {
-            // Jeśli jesteś w rzędzie 1-6 (indeksy 1-6), idź do 0
-            // Jeśli jesteś w rzędzie 7-12 (indeksy 7-12), idź do odpowiedniego w górnym rzędzie (7->1, 8->2, itd.)
             if (selectedIndex >= 7 && selectedIndex <= 12) {
                 selectedIndex = selectedIndex - 6;
             } else if (selectedIndex >= 1 && selectedIndex <= 6) {
                 selectedIndex = 0;
             }
+            loadBackground(selectedIndex); // Załaduj nowe tło dla wybranego levelu
         } else if (key->code == Key::Down) {
-            // Z 0 idź do 1
-            // Z rzędu 1-6 idź do 7-12
             if (selectedIndex == 0) {
                 selectedIndex = 1;
             } else if (selectedIndex >= 1 && selectedIndex <= 6) {
@@ -75,7 +110,15 @@ void GameMap::handleEvent(const sf::Event& event, int* currentScreen) {
             } else if (selectedIndex >= 7 && selectedIndex <= 12) {
                 selectedIndex = 0;
             }
+            loadBackground(selectedIndex); // Załaduj nowe tło dla wybranego levelu
         } else if (key->code == Key::Enter) {
+            // Sprawdź czy level jest odblokowany przed wejściem
+            bool isUnlocked = (selectedIndex <= saveData.maxLevelUnlocked);
+            if (!isUnlocked) {
+                std::cout << "Level " << selectedIndex << " jest zablokowany!" << std::endl;
+                return; // Nie pozwól wejść do zablokowanego levelu
+            }
+
             // Wybór poziomu w zależności od selectedIndex
             if (selectedIndex == 0) {
                 *currentScreen = 4; // Poziom 0 - Sklep
@@ -90,7 +133,7 @@ void GameMap::handleEvent(const sf::Event& event, int* currentScreen) {
 
 void GameMap::draw(sf::RenderWindow& window) {
     sf::Vector2u windowSize = window.getSize();
-    sf::Vector2u textureSize = backgroundTexture.getSize();
+    sf::Vector2u textureSize = currentBackgroundTexture.getSize();
 
     // Rysuj tło
     if (background.has_value() && textureSize.x > 0 && textureSize.y > 0) {
@@ -100,10 +143,9 @@ void GameMap::draw(sf::RenderWindow& window) {
         window.draw(*background);
     }
 
-    // Rysuj tiles (liczby) z podświetleniem wybranego
+    // Rysuj tiles (liczby) - bez zmiany koloru, tylko tło się zmienia
     for (size_t i = 0; i < tiles.size(); ++i) {
-        // Cyan dla niewybranych, Dark Blue (0, 0, 139) dla wybranego
-        tiles[i].setFillColor(static_cast<int>(i) == selectedIndex ? sf::Color(0, 0, 139) : sf::Color::Cyan);
         window.draw(tiles[i]);
     }
 }
+

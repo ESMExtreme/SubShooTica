@@ -1,12 +1,9 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <vector>
-
-#include <fstream>
-#include <iostream> 
 #include <string>
-#include <sstream>
 
 class Options {
 public:
@@ -17,18 +14,18 @@ public:
     int musicVolume = 50; 
     int sfxVolume = 50;
 };
+
 class OptionsMenu {
 public:
     OptionsMenu(sf::Music* music);
     void draw(sf::RenderWindow& window);
     void MoveUp();
     void MoveDown();
-    void MoveLeft();
-    void MoveRight();
     int GetPressedItem() const { return selectedItemIndex; }
-    void CreateTile(std::string string, sf::Color color, sf::Vector2f position, int index, int fontSize);
+    void CreateTile(std::string string, sf::Color color, sf::Vector2f position, int fontSize);
     Options optionsList;
     void keyPressHandler(const sf::Event::KeyPressed* key, int* currentScreen);
+    bool shouldApplySettings = false; // Flag dla main.cpp
 private:
     sf::Music* musicPtr;
     sf::Font font;
