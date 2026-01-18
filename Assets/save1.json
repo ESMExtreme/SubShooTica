@@ -1,8 +1,9 @@
 {
-  "scrap": 1000,
-  "currentLevel": 2,
-  "maxLevelUnlocked": 5,
-  "shopItemsPurchased": [true, false, false, false, false, false, false]
+  "scrap": 0,
+  "currentLevel": 0,
+  "maxLevelUnlocked": 0,
+  "tutorialCompleted": false,
+  "shopItemsPurchased": [false, false, false, false, false, false, false]
 }
 
 

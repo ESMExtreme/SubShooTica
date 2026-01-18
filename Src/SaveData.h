@@ -11,8 +11,9 @@ struct SaveData {
     int currentLevel;
     int maxLevelUnlocked;
     std::vector<bool> shopItemsPurchased; // 7 przedmiotów w sklepie
+    bool tutorialCompleted; // Czy tutorial został ukończony
 
-    SaveData() : scrap(0), currentLevel(0), maxLevelUnlocked(0), shopItemsPurchased(7, false) {}
+    SaveData() : scrap(0), currentLevel(0), maxLevelUnlocked(0), shopItemsPurchased(7, false), tutorialCompleted(false) {}
 
     // Zapisz dane do pliku JSON
     bool saveToFile(const std::string& filename) const {
@@ -26,6 +27,7 @@ struct SaveData {
         file << "  \"scrap\": " << scrap << ",\n";
         file << "  \"currentLevel\": " << currentLevel << ",\n";
         file << "  \"maxLevelUnlocked\": " << maxLevelUnlocked << ",\n";
+        file << "  \"tutorialCompleted\": " << (tutorialCompleted ? "true" : "false") << ",\n";
         file << "  \"shopItemsPurchased\": [";
 
         for (size_t i = 0; i < 7; ++i) {
@@ -108,6 +110,18 @@ struct SaveData {
                         try {
                             maxLevelUnlocked = std::stoi(value);
                         } catch (...) {}
+                    }
+                }
+            }
+            else if (line.find("\"tutorialCompleted\"") != std::string::npos) {
+                size_t pos = line.find(":");
+                if (pos != std::string::npos) {
+                    std::string value = line.substr(pos + 1);
+                    // Usuń białe znaki i szukaj true/false
+                    if (value.find("true") != std::string::npos) {
+                        tutorialCompleted = true;
+                    } else {
+                        tutorialCompleted = false;
                     }
                 }
             }

@@ -109,6 +109,11 @@ int main()
                 int slot = saveScreen.getSelectedSaveSlot();
                 map.setSaveSlot(slot);
 
+            } else if (PreviousScreen == 5 && CurrentScreen == 3) {
+                // Powrót z poziomu do mapy - odśwież dane zapisu
+                int slot = map.getSaveSlot();
+                map.setSaveSlot(slot); // Przeładuj saveData i zaktualizuj tła
+
             } else if (PreviousScreen == 3 && CurrentScreen == 4) {
                 // Przejście z GameMap do ShopInGame (poziom 0)
                 int slot = map.getSaveSlot();
