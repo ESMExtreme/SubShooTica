@@ -47,9 +47,20 @@ target_link_libraries(main PRIVATE
 )
 
 
-# --- Assets / Fonts handling ---
-# Place your font files in: <repo-root>/Assets/Fonts/*.ttf (or other font extensions)
+# --- Assets handling ---
+# Kopiuj cały folder Assets do katalogu bin po każdej kompilacji
 set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/Assets")
+
+# Automatyczne kopiowanie całego folderu Assets do bin
+add_custom_command(TARGET main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${ASSETS_DIR}"
+    "$<TARGET_FILE_DIR:main>/Assets"
+    COMMENT "Copying entire Assets directory to runtime output"
+)
+
+# --- Assets / Fonts handling (stare metody - zachowane dla kompatybilności) ---
+# Place your font files in: <repo-root>/Assets/Fonts/*.ttf (or other font extensions)
 file(GLOB_RECURSE FONT_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Fonts/*")
 
 file(GLOB_RECURSE OPTION_FILE CONFIGURE_DEPENDS "${ASSETS_DIR}/options.txt")
