@@ -213,10 +213,10 @@ void ShopInGame::draw(sf::RenderWindow& window) {
         }
     }
 
-    // Rysuj tekst instrukcji
-    if (instructionText.has_value()) {
-        window.draw(*instructionText);
-    }
+    // Nie rysuj instructionText
+    // if (instructionText.has_value()) {
+    //     window.draw(*instructionText);
+    // }
 }
 
 void ShopInGame::loadFromSaveData(SaveData* saveDataPtr) {
@@ -245,12 +245,12 @@ void ShopInGame::initializeShopItems() {
 
     std::vector<ItemData> itemsData = {
         {"Potrójny strzał", "Strzelaj 3 pociskami naraz", 500, 0, "Assets/Media/shop_items/itemshop_3shot.png"},
-        {"Strzał w tył", "Strzelaj również do tyłu", 400, 1, "Assets/Media/shop_items/itemshop_backshoot.png"},
-        {"Cyclop Power", "Specjalna moc Cyclopa", 1000, 2, "Assets/Media/shop_items/itemshop_cyclop.png"},
+        {"Strzał w tył", "Strzelaj również do tyłu", 800, 1, "Assets/Media/shop_items/itemshop_backshoot.png"},
+        {"Szybki strzał II", "Jeszcze szybsze strzały", 500, 2, "Assets/Media/shop_items/itemshop_quickshoot2.png"}, // zamienione miejsce z Cyclop Power
         {"HP Upgrade I", "+5 maksymalnego HP", 300, 3, "Assets/Media/shop_items/itemshop_hpup1.png"},
         {"HP Upgrade II", "+10 maksymalnego HP", 600, 4, "Assets/Media/shop_items/itemshop_hpup2.png"},
         {"Szybki strzał I", "Zwiększ szybkość strzałów", 250, 5, "Assets/Media/shop_items/itemshop_quickshoot1.png"},
-        {"Szybki strzał II", "Jeszcze szybsze strzały", 500, 6, "Assets/Media/shop_items/itemshop_quickshoot2.png"}
+        {"Cyclop Power", "Specjalna moc Cyclopa", 100, 6, "Assets/Media/shop_items/itemshop_cyclop.png"} // zamienione miejsce z Szybki strzał II
     };
 
     // Rozmieszczenie: 3 w górnym rzędzie, 4 w dolnym
@@ -271,7 +271,7 @@ void ShopInGame::initializeShopItems() {
         int col = i % 3;
         item.position = sf::Vector2f(startX + col * spacingX, startY + row * spacingY);
 
-        // Załaduj teksturę jako shared_ptr
+        // Załaduj teksturę
         item.texture = std::make_shared<sf::Texture>();
         if (item.texture->loadFromFile(itemsData[i].texturePath)) {
             item.sprite.emplace(*item.texture);
