@@ -47,20 +47,9 @@ target_link_libraries(main PRIVATE
 )
 
 
-# --- Assets handling ---
-# Kopiuj cały folder Assets do katalogu bin po każdej kompilacji
-set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/Assets")
-
-# Automatyczne kopiowanie całego folderu Assets do bin
-add_custom_command(TARGET main POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${ASSETS_DIR}"
-    "$<TARGET_FILE_DIR:main>/Assets"
-    COMMENT "Copying entire Assets directory to runtime output"
-)
-
-# --- Assets / Fonts handling (stare metody - zachowane dla kompatybilności) ---
+# --- Assets / Fonts handling ---
 # Place your font files in: <repo-root>/Assets/Fonts/*.ttf (or other font extensions)
+set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/Assets")
 file(GLOB_RECURSE FONT_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Fonts/*")
 
 file(GLOB_RECURSE OPTION_FILE CONFIGURE_DEPENDS "${ASSETS_DIR}/options.txt")
@@ -124,9 +113,16 @@ file(GLOB_RECURSE MAP_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Media/Map/*")
 if(MAP_FILES)
     foreach(_map ${MAP_FILES})
         get_filename_component(_map_dir "${_map}" DIRECTORY)
+        # relative path under Assets/Media (e.g. Map/locked or Map/unlocked)
         file(RELATIVE_PATH _rel_dir "${ASSETS_DIR}/Media" "${_map_dir}")
+        get_filename_component(_map_name "${_map}" NAME)
+        # Ensure destination subdirectory exists before copying
         add_custom_command(TARGET main POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_map}" "$<TARGET_FILE_DIR:main>/Assets/Media/${_rel_dir}"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/Assets/Media/${_rel_dir}"
+        )
+        # Copy the file into the destination directory preserving the filename
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_map}" "$<TARGET_FILE_DIR:main>/Assets/Media/${_rel_dir}/${_map_name}"
             COMMENT "Copying map background ${_map} to runtime output"
         )
     endforeach()
@@ -154,14 +150,17 @@ endif()
 file(GLOB_RECURSE MEDIA_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Media/*")
 
 if(MEDIA_FILES)
-    # Ensure destination directory exists
-    add_custom_command(TARGET main POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/Assets/Media"
-    )
-    # Copy each media file to the runtime output directory
+    # Copy each media file to the runtime output directory preserving subdirectories
     foreach(_media ${MEDIA_FILES})
+        get_filename_component(_media_dir "${_media}" DIRECTORY)
+        file(RELATIVE_PATH _rel_media "${ASSETS_DIR}/Media" "${_media_dir}")
+        get_filename_component(_media_name "${_media}" NAME)
+        # Ensure destination directory exists
         add_custom_command(TARGET main POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_media}" "$<TARGET_FILE_DIR:main>/Assets/Media"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/Assets/Media/${_rel_media}"
+        )
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_media}" "$<TARGET_FILE_DIR:main>/Assets/Media/${_rel_media}/${_media_name}"
             COMMENT "Copying media ${_media} to runtime output"
         )
     endforeach()
