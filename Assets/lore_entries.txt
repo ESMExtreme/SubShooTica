@@ -3,21 +3,105 @@
 # Potem tytul, a w kolejnych liniach tresc (do nastepnego [LOG_X])
 
 [LOG_1]
-Dzien 1 - Pierwsza ekspedycja
-Zanurzyliśmy się dzisiaj na głębokość 500 metrow.
-Woda jest zimna i ciemna, ale systemy łodzi
-działają bez zarzutu. Widziałem dziwne swiatła
-w oddali...
+Lifepod 3
+"RADIO: Receiving pre-recorded distress call. Playing back...
+This is Lifepod 3, uploading our co-ordinates.
+We're plugging some holes in our emergency Seaglide,
+so if we're late for the rendezvous, don't panic.
+Also, don't go home without us. Seriously. 3 out."
 
 [LOG_2]
+Lifepod 19
+"RADIO: Playing pre-recorded distress call...
+OFFICER KEEN: This is Officer Keen in Lifepod 19! The captain is gone. I have assumed command.
+The last thing the captain did was give me co-ordinates for dry land.
+ We regroup one and a half kilometers south-west of the crash site.
+Stay together, and good luck. This message will now repeat.
+PDA: Rendezvous co-ordinates corrupted. Transmission origin co-ordinates downloaded."
 
 [LOG_3]
-
+Lifepod 17
+"RADIO: Playing pre-recorded distress call...
+This is Ozzy from the cafeteria, what the hell guys?!
+ They didn't warn us this might happen!
+Our pod was almost crushed by the seamoth bay on the way down,
+ now we're hanging on the edge of a cave system
+  and this grim-looking snake-thing's trying to eat through the hull!
+Come get us already!"
 
 [LOG_4]
+Lifepod 13
+"RADIO: High priority automated message from Aurora Lifepod 13. Co-ordinates attached.
+Lifepod is carrying high priority passenger 'Jochi Khasar.'
+ I said Khasar!
+  Why do I have to record this anyway?'. Send immediate burial detail."
 
 [LOG_5]
+Lifepod 12
+"RADIO: This is an automated distress signal from Lifepod 12,
+ co-ordinates attached.
+Warning: Lifepod has sunk beyond safe diving distance.
+ Do not attempt retrieval without submersible support."
 
 [LOG_6]
+Lifepod 2
+"RADIO: Playing pre-recorded distress call...
+CTO YU: This is Lifepod 2,
+ co-ordinates attached!
+  We're way past our safe depth and bleeding O2.
+We'll have to swim for the surface,
+ but it's 500 meters straight up.
+We'll make for the rendezvous and keep you posted.
+ Out."
 
 [LOG_7]
+Lifepod 19
+"RADIO: Playing pre-recorded distress call...
+"RADIO: This is an automated distress signal from Lifepod 19,
+ co-ordinates attached.
+Warning: Lifepod has sunk beyond safe diving distance.
+ Do not attempt retrieval without submersible support."
+
+[LOG_8]
+OFFICER KEEN'S PDA - Lifepod 19
+"PDA: Playing pre-recorded crew member's PDA blackbox message...
+OFFICER KEEN: This is Officer Keen in Lifepod 19!
+ The captain is gone. I have assumed command.
+The last thing the captain did was give me co-ordinates for dry land.
+ We regroup one and a half kilometers south-west of the crash site.
+Stay together, and good luck. This message will now repeat.
+PDA: Rendezvous co-ordinates downloaded.
+
+[LOG_9]
+Lifepod 7
+"RADIO: Playing pre-recorded distress call...
+This is Lifepod 7, co-ordinates attached.
+ Pod is structurally sound, but the fabricator's bust.
+Requesting immediate assistance. 7, out."
+
+[LOG_10]
+EXTRACTED PDA LOG - DEGASI
+"PDA: Local short-range RAdar Detected an remains of survivor's PDA's with an Outdated software version.
+ Attempting data extraction...
+DATA EXTRACTION COMPLETE.
+DATA CORRUPTED. PARTIAL LOG RETRIEVED. ORIGIN POINT RETRIEVED.
+Extracted data follows:"
+
+[...]
+MARGUERIT: Come on then, what's it gonna do? Turn us inside out? Dissolve us into slime?
+
+BART: It's an alien bacteria. It's everywhere. Every organism on this planet.
+ It's altering our genetic code.
+
+PAUL: How are the creatures surviving if they're infected?
+
+BART: I don't know yet.
+[...]
+
+
+[LOG_11]
+"Translating local alien broadcast...
+"Translating local alien broadcast...
+ WARNING: Vaccine development program terminated.
+  Emperor egg hatching project terminated.
+   Live specimens terminated. Evacuate immediately."
