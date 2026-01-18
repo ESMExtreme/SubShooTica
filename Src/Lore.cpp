@@ -256,6 +256,7 @@ void Lore::updateDisplay() {
 
     if (showingLoreList) {
         // Wyświetl listę logów
+        std::string header = "Wybierz wpis:\n\n";
         sf::String listText = sf::String::fromUtf8(header.begin(), header.end());
 
         for (size_t i = 0; i < loreEntries.size(); ++i) {
