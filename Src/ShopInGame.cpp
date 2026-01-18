@@ -1,173 +1,322 @@
 #include "ShopInGame.h"
 
-ShopInGame::ShopInGame() : selectedIndex(0), currentSaveSlot(0), saveData(nullptr), titleText(), scrapText() {
-    font.openFromFile("Assets/Fonts/BerlinSans.ttf");
+ShopInGame::ShopInGame() : currentSaveSlot(0), saveData(nullptr), scrapText() {
+    if (!font.openFromFile("Assets/Fonts/BerlinSans.ttf")) {
+        // Handle error
+    }
 
-    // Tytuł sklepu
-    titleText.emplace(font);
-    titleText->setString("SKLEP");
-    titleText->setCharacterSize(60);
-    titleText->setFillColor(sf::Color::Yellow);
-    titleText->setPosition(sf::Vector2f(800.f, 50.f));
+    // Załaduj tło bg_S&L.png
+    if (backgroundTexture.loadFromFile("Assets/Media/bg_SnL.png")) {
+        background.emplace(backgroundTexture);
+    }
 
     // Tekst ze złomem
-    scrapText.emplace(font);
-    scrapText->setCharacterSize(40);
-    scrapText->setFillColor(sf::Color::Green);
-    scrapText->setPosition(sf::Vector2f(50.f, 50.f));
+    scrapText.emplace(font, "Zlom: 0", 40);
+    scrapText->setFillColor(sf::Color::Yellow);
+    scrapText->setPosition(sf::Vector2f(250.f, 90.f));
 
-    createShopItems();
-}
+    // Załaduj tekstury ikonek (tak jak na mapie)
+    if (loreIconTexture.loadFromFile("Assets/Media/ikonka_lore.png")) {
+        loreIcon.emplace(loreIconTexture);
+        loreIcon->setPosition(sf::Vector2f(250.f, 140.f));
+        loreIcon->setScale(sf::Vector2f(0.5f, 0.5f));
 
-void ShopInGame::createShopItems() {
-    items.clear();
-    itemTexts.clear();
-    itemBoxes.clear();
-
-    // Definicja przedmiotów w sklepie
-    items.push_back({"Szybsze Pociski", "+50% predkosc pociskow", 100, false});
-    items.push_back({"Wieksze Pociski", "+100% rozmiar pociskow", 150, false});
-    items.push_back({"Szybszy Ruch", "+50% predkosc ruchu", 200, false});
-    items.push_back({"Podwojne Zycie", "+100% HP", 300, false});
-    items.push_back({"Szybsze Strzelanie", "-50% cooldown", 250, false});
-
-    // Tworzenie wizualnych elementów
-    float yPos = 200.f;
-    for (size_t i = 0; i < items.size(); ++i) {
-        // Prostokąt dla przedmiotu
-        sf::RectangleShape box;
-        box.setSize(sf::Vector2f(1200.f, 100.f));
-        box.setPosition(sf::Vector2f(360.f, yPos));
-        box.setFillColor(sf::Color(50, 50, 50));
-        box.setOutlineThickness(3.f);
-        box.setOutlineColor(sf::Color::White);
-        itemBoxes.push_back(box);
-
-        // Tekst przedmiotu
-        sf::Text text(font);
-        text.setCharacterSize(30);
-        text.setFillColor(sf::Color::White);
-        text.setPosition(sf::Vector2f(380.f, yPos + 10.f));
-        itemTexts.push_back(text);
-
-        yPos += 130.f;
+        // Tekst "B" obok ikonki lore
+        loreText.emplace(font, "B", 40);
+        loreText->setFillColor(sf::Color::White);
+        loreText->setPosition(sf::Vector2f(320.f, 140.f));
     }
 
-    updateDisplay();
-}
+    if (mapIconTexture.loadFromFile("Assets/Media/ikonka_mapa.png")) {
+        mapIcon.emplace(mapIconTexture);
+        mapIcon->setPosition(sf::Vector2f(250.f, 200.f));
+        mapIcon->setScale(sf::Vector2f(0.5f, 0.5f));
 
-void ShopInGame::updateDisplay() {
-    if (scrapText.has_value() && saveData) {
-        scrapText->setString("Zlom: " + std::to_string(saveData->scrap));
+        // Tekst "M" obok ikonki mapa
+        mapText.emplace(font, "M", 40);
+        mapText->setFillColor(sf::Color::White);
+        mapText->setPosition(sf::Vector2f(320.f, 200.f));
     }
 
-    for (size_t i = 0; i < items.size(); ++i) {
-        std::string displayText = items[i].name + " - $" + std::to_string(items[i].price);
-        if (items[i].purchased) {
-            displayText += " [KUPIONE]";
-            itemTexts[i].setFillColor(sf::Color(100, 100, 100));
-        } else {
-            displayText += "\n" + items[i].description;
-            itemTexts[i].setFillColor(sf::Color::White);
-        }
-        itemTexts[i].setString(displayText);
+    if (shopIconTexture.loadFromFile("Assets/Media/ikonka_sklep.png")) {
+        shopIcon.emplace(shopIconTexture);
+        shopIcon->setPosition(sf::Vector2f(250.f, 260.f));
+        shopIcon->setScale(sf::Vector2f(0.5f, 0.5f));
 
-        // Podświetl wybrany przedmiot
-        if (static_cast<int>(i) == selectedIndex) {
-            itemBoxes[i].setOutlineColor(sf::Color::Yellow);
-            itemBoxes[i].setOutlineThickness(5.f);
-        } else {
-            itemBoxes[i].setOutlineColor(sf::Color::White);
-            itemBoxes[i].setOutlineThickness(3.f);
-        }
+        // Tekst "N" obok ikonki sklep
+        shopText.emplace(font, "N", 40);
+        shopText->setFillColor(sf::Color::White);
+        shopText->setPosition(sf::Vector2f(320.f, 260.f));
     }
+
+    // Inicjalizuj przedmioty sklepu
+    initializeShopItems();
+
+    // Tekst instrukcji
+    instructionText.emplace(font, "Nacisnij 1-7 aby kupic przedmiot", 25);
+    instructionText->setFillColor(sf::Color::White);
+    instructionText->setPosition(sf::Vector2f(650.f, 850.f));
 }
 
 void ShopInGame::handleEvent(const sf::Event& event, int* currentScreen) {
     if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
         using Key = sf::Keyboard::Key;
 
-        if (key->code == Key::Up) {
-            selectedIndex = (selectedIndex - 1 + items.size()) % items.size();
-            updateDisplay();
-        } else if (key->code == Key::Down) {
-            selectedIndex = (selectedIndex + 1) % items.size();
-            updateDisplay();
-        } else if (key->code == Key::Enter) {
-            purchaseItem();
-        } else if (key->code == Key::Escape) {
+        if (key->code == Key::Escape) {
             // Zapisz wszystkie zmiany do pliku JSON przed wyjściem ze sklepu
             if (saveData) {
                 std::string saveFile = "Assets/save" + std::to_string(currentSaveSlot) + ".json";
-                bool success = saveData->saveToFile(saveFile);
-                // Debug: sprawdź czy zapisywanie się powiodło
-                if (!success) {
-                    // Można dodać logowanie błędu
-                }
+                saveData->saveToFile(saveFile);
             }
             *currentScreen = *currentScreen - 1; // Wróć do poprzedniego ekranu
+        } else if (key->code == Key::B) {
+            // Przejdź do ekranu Lore (currentScreen 6)
+            *currentScreen = 6;
+        } else if (key->code == Key::M) {
+            // Przejdź do mapy (currentScreen 3)
+            *currentScreen = 3;
         }
-    }
-}
+        // Kup przedmioty (klawisze 1-7)
+        else if (saveData) {
+            int itemIndex = -1;
 
-void ShopInGame::purchaseItem() {
-    if (!saveData) return;
+            if (key->code == Key::Num1 || key->code == Key::Numpad1) itemIndex = 0;
+            else if (key->code == Key::Num2 || key->code == Key::Numpad2) itemIndex = 1;
+            else if (key->code == Key::Num3 || key->code == Key::Numpad3) itemIndex = 2;
+            else if (key->code == Key::Num4 || key->code == Key::Numpad4) itemIndex = 3;
+            else if (key->code == Key::Num5 || key->code == Key::Numpad5) itemIndex = 4;
+            else if (key->code == Key::Num6 || key->code == Key::Numpad6) itemIndex = 5;
+            else if (key->code == Key::Num7 || key->code == Key::Numpad7) itemIndex = 6;
 
-    if (selectedIndex >= 0 && selectedIndex < static_cast<int>(items.size())) {
-        ShopItem& item = items[selectedIndex];
+            // Sprawdź czy można kupić przedmiot
+            if (itemIndex >= 0 && itemIndex < static_cast<int>(shopItems.size())) {
+                ShopItem& item = shopItems[itemIndex];
 
-        if (!item.purchased && saveData->scrap >= item.price) {
-            item.purchased = true;
-            saveData->scrap -= item.price;
-            // Zapisz do SaveData
-            if (selectedIndex < static_cast<int>(saveData->shopItemsPurchased.size())) {
-                saveData->shopItemsPurchased[selectedIndex] = true;
+                // Sprawdź czy przedmiot nie jest już kupiony
+                if (item.itemIndex < saveData->shopItemsPurchased.size() &&
+                    !saveData->shopItemsPurchased[item.itemIndex]) {
+
+                    // Sprawdź czy gracz ma wystarczająco złomu
+                    if (saveData->scrap >= item.price) {
+                        // Kup przedmiot
+                        saveData->scrap -= item.price;
+                        saveData->shopItemsPurchased[item.itemIndex] = true;
+
+                        // Aktualizuj wyświetlanie
+                        updateShopItemsDisplay();
+
+                        // Zapisz zmiany
+                        std::string saveFile = "Assets/save" + std::to_string(currentSaveSlot) + ".json";
+                        saveData->saveToFile(saveFile);
+                    }
+                }
             }
-            // Natychmiast zapisz do pliku JSON po zakupie
-            saveData->saveToFile("Assets/save" + std::to_string(currentSaveSlot) + ".json");
-            updateDisplay();
         }
     }
 }
 
 void ShopInGame::update(float deltaTime, sf::Vector2u windowSize) {
-    // Aktualizacja (jeśli potrzebna)
+    // Aktualizacja ilości złomu
+    if (scrapText.has_value() && saveData) {
+        scrapText->setString("Zlom: " + std::to_string(saveData->scrap));
+    }
 }
 
 void ShopInGame::draw(sf::RenderWindow& window) {
-    // Rysuj tło
-    sf::RectangleShape background;
-    background.setSize(sf::Vector2f(static_cast<float>(window.getSize().x),
-                                    static_cast<float>(window.getSize().y)));
-    background.setFillColor(sf::Color(20, 20, 30));
-    window.draw(background);
+    sf::Vector2u windowSize = window.getSize();
 
-    // Rysuj tytuł i złom
-    if (titleText.has_value()) {
-        window.draw(*titleText);
+    // Rysuj tło bg_SnL.png
+    if (background.has_value() && backgroundTexture.getSize().x > 0 && backgroundTexture.getSize().y > 0) {
+        sf::Vector2u textureSize = backgroundTexture.getSize();
+        float scaleX = static_cast<float>(windowSize.x) / static_cast<float>(textureSize.x);
+        float scaleY = static_cast<float>(windowSize.y) / static_cast<float>(textureSize.y);
+        background->setScale(sf::Vector2f(scaleX, scaleY));
+        window.draw(*background);
     }
+
+    // Rysuj tekst ze złomem
     if (scrapText.has_value()) {
         window.draw(*scrapText);
     }
 
+    // Rysuj ikonki
+    if (loreIcon.has_value()) {
+        window.draw(*loreIcon);
+    }
+    if (mapIcon.has_value()) {
+        window.draw(*mapIcon);
+    }
+    if (shopIcon.has_value()) {
+        window.draw(*shopIcon);
+    }
+
+    // Rysuj teksty obok ikonek
+    if (loreText.has_value()) {
+        window.draw(*loreText);
+    }
+    if (mapText.has_value()) {
+        window.draw(*mapText);
+    }
+    if (shopText.has_value()) {
+        window.draw(*shopText);
+    }
+
     // Rysuj przedmioty
-    for (size_t i = 0; i < itemBoxes.size(); ++i) {
-        window.draw(itemBoxes[i]);
-        window.draw(itemTexts[i]);
+    for (size_t i = 0; i < shopItems.size(); ++i) {
+        const auto& item = shopItems[i];
+
+        // Rysuj ramkę wokół przedmiotu
+        sf::RectangleShape itemBorder;
+        itemBorder.setSize(sf::Vector2f(250.f, 200.f));
+        itemBorder.setPosition(sf::Vector2f(item.position.x - 10.f, item.position.y - 10.f));
+        itemBorder.setFillColor(sf::Color::Transparent);
+        itemBorder.setOutlineThickness(2.f);
+
+        // Kolor ramki zależny od statusu
+        if (saveData &&
+            item.itemIndex < saveData->shopItemsPurchased.size() &&
+            saveData->shopItemsPurchased[item.itemIndex]) {
+            itemBorder.setOutlineColor(sf::Color::Green); // Kupiony - zielony
+        } else if (saveData && saveData->scrap >= item.price) {
+            itemBorder.setOutlineColor(sf::Color::Yellow); // Można kupić - żółty
+        } else {
+            itemBorder.setOutlineColor(sf::Color(100, 100, 100)); // Za drogi - szary
+        }
+        window.draw(itemBorder);
+
+        // Rysuj numer przedmiotu (1-7)
+        sf::Text numberText(font);
+        numberText.setString("[" + std::to_string(i + 1) + "]");
+        numberText.setCharacterSize(22);
+        numberText.setFillColor(sf::Color::Cyan);
+        numberText.setPosition(sf::Vector2f(item.position.x, item.position.y - 35.f));
+        window.draw(numberText);
+
+        // Rysuj sprite przedmiotu
+        if (item.sprite.has_value()) {
+            window.draw(*item.sprite);
+        }
+
+        // Rysuj tekst nazwy przedmiotu
+        if (item.nameText.has_value()) {
+            window.draw(*item.nameText);
+        }
+
+        // Rysuj tekst ceny
+        if (item.priceText.has_value()) {
+            window.draw(*item.priceText);
+        }
+
+        // Rysuj tekst statusu
+        if (item.statusText.has_value()) {
+            window.draw(*item.statusText);
+        }
+    }
+
+    // Rysuj tekst instrukcji
+    if (instructionText.has_value()) {
+        window.draw(*instructionText);
     }
 }
 
 void ShopInGame::loadFromSaveData(SaveData* saveDataPtr) {
     saveData = saveDataPtr;
 
-    if (!saveData) return;
-
-    // Wczytaj stan zakupów ze SaveData
-    for (size_t i = 0; i < items.size() && i < saveData->shopItemsPurchased.size(); ++i) {
-        items[i].purchased = saveData->shopItemsPurchased[i];
+    // Aktualizuj wyświetlanie złomu
+    if (scrapText.has_value() && saveData) {
+        scrapText->setString("Zlom: " + std::to_string(saveData->scrap));
     }
 
-    updateDisplay();
+    // Aktualizuj wyświetlanie statusu przedmiotów
+    updateShopItemsDisplay();
 }
 
+void ShopInGame::initializeShopItems() {
+    shopItems.clear();
 
+    // Definicje przedmiotów (nazwa, opis, cena, indeks, ścieżka do tekstury)
+    struct ItemData {
+        std::string name;
+        std::string desc;
+        int price;
+        int index;
+        std::string texturePath;
+    };
+
+    std::vector<ItemData> itemsData = {
+        {"Potrójny strzał", "Strzelaj 3 pociskami naraz", 500, 0, "Assets/Media/shop_items/itemshop_3shot.png"},
+        {"Strzał w tył", "Strzelaj również do tyłu", 400, 1, "Assets/Media/shop_items/itemshop_backshoot.png"},
+        {"Cyclop Power", "Specjalna moc Cyclopa", 1000, 2, "Assets/Media/shop_items/itemshop_cyclop.png"},
+        {"HP Upgrade I", "+5 maksymalnego HP", 300, 3, "Assets/Media/shop_items/itemshop_hpup1.png"},
+        {"HP Upgrade II", "+10 maksymalnego HP", 600, 4, "Assets/Media/shop_items/itemshop_hpup2.png"},
+        {"Szybki strzał I", "Zwiększ szybkość strzałów", 250, 5, "Assets/Media/shop_items/itemshop_quickshoot1.png"},
+        {"Szybki strzał II", "Jeszcze szybsze strzały", 500, 6, "Assets/Media/shop_items/itemshop_quickshoot2.png"}
+    };
+
+    // Rozmieszczenie: 3 w górnym rzędzie, 4 w dolnym
+    float startX = 500.f;
+    float startY = 300.f;
+    float spacingX = 300.f;
+    float spacingY = 250.f;
+
+    for (size_t i = 0; i < itemsData.size(); ++i) {
+        ShopItem item;
+        item.name = itemsData[i].name;
+        item.description = itemsData[i].desc;
+        item.price = itemsData[i].price;
+        item.itemIndex = itemsData[i].index;
+
+        // Oblicz pozycję (3 w rzędzie)
+        int row = i / 3;
+        int col = i % 3;
+        item.position = sf::Vector2f(startX + col * spacingX, startY + row * spacingY);
+
+        // Załaduj teksturę jako shared_ptr
+        item.texture = std::make_shared<sf::Texture>();
+        if (item.texture->loadFromFile(itemsData[i].texturePath)) {
+            item.sprite.emplace(*item.texture);
+            item.sprite->setPosition(item.position);
+
+            // Skaluj sprite do rozmiarów np. 100x100
+            sf::Vector2u texSize = item.texture->getSize();
+            float scale = 100.f / std::max(texSize.x, texSize.y);
+            item.sprite->setScale(sf::Vector2f(scale, scale));
+        }
+
+        // Tekst nazwy przedmiotu
+        item.nameText.emplace(font, item.name, 20);
+        item.nameText->setFillColor(sf::Color::White);
+        item.nameText->setPosition(sf::Vector2f(item.position.x, item.position.y + 110.f));
+
+        // Tekst ceny
+        item.priceText.emplace(font, std::to_string(item.price) + " zlom", 18);
+        item.priceText->setFillColor(sf::Color::Yellow);
+        item.priceText->setPosition(sf::Vector2f(item.position.x, item.position.y + 135.f));
+
+        // Tekst statusu (wypełniony w updateShopItemsDisplay)
+        item.statusText.emplace(font, "", 18);
+        item.statusText->setPosition(sf::Vector2f(item.position.x, item.position.y + 160.f));
+
+        shopItems.push_back(item);
+    }
+}
+
+void ShopInGame::updateShopItemsDisplay() {
+    if (!saveData) return;
+
+    for (auto& item : shopItems) {
+        if (item.itemIndex < saveData->shopItemsPurchased.size() &&
+            saveData->shopItemsPurchased[item.itemIndex]) {
+            // Przedmiot kupiony
+            if (item.statusText.has_value()) {
+                item.statusText->setString("KUPIONO");
+                item.statusText->setFillColor(sf::Color::Green);
+            }
+        } else {
+            // Przedmiot dostępny
+            if (item.statusText.has_value()) {
+                item.statusText->setString("");
+            }
+        }
+    }
+}

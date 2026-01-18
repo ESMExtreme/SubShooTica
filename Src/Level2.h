@@ -26,8 +26,10 @@ struct Bullet2 {
 
 struct Enemy2 {
     sf::RectangleShape shape;
+    std::optional<sf::Sprite> sprite;
     sf::Vector2f velocity;
     int hp = 1; // HP przeciwnika
+    bool useTexture = false; // true = sprite, false = shape
 };
 
 class Level2 {
@@ -43,6 +45,7 @@ public:
     int getScrap() const { return saveData.scrap; }
     SaveData* getSaveData() { return &saveData; }
     void setLevel(int level);
+    void reset(); // Resetuje poziom do stanu początkowego
 
 private:
     Background2 background_1;
@@ -50,6 +53,7 @@ private:
     sf::Sprite sprite;
 
     sf::CircleShape ball;
+    sf::Texture playerTexture; // Tekstura dla kulki (seam.png)
     sf::Vector2f velocity;
     std::vector<Bullet2> bullets;
     sf::Vector2f bulletVelocity;
@@ -61,6 +65,17 @@ private:
     // System zapisu
     SaveData saveData;
     int currentSaveSlot;
+
+    // System HP
+    int maxHP = 10;
+    int currentHP = 10;
+    sf::CircleShape hpCircle; // Okrągły pasek HP wokół gracza
+    std::optional<sf::Text> hpText;
+
+    // Game Over
+    bool isGameOver = false;
+    sf::RectangleShape gameOverOverlay;
+    std::optional<sf::Text> gameOverText;
 
     // UI złomu
     sf::Font font;

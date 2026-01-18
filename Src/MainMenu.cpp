@@ -50,10 +50,10 @@ MainMenu::MainMenu(float width, float height, sf::Music& music) : menuMusic(musi
 }
  
 
-	CreateTile("Start Game", sf::Color::Red, { 455,535 }, 0);
+	CreateTile("Start Gry", sf::Color(255, 165, 0), { 455,535 }, 0);
     mainMenu[0].setScale({ 1.1f,1.1f });
-    CreateTile("Options", sf::Color::White, { 455,640 }, 1);
-    CreateTile("Exit", sf::Color::White, { 455,745 }, 2);
+    CreateTile("Opcje", sf::Color::White, { 455,640 }, 1);
+    CreateTile("Wyjscie", sf::Color::White, { 455,745 }, 2);
     selectedItemIndex = 0; // start with first item selected
 }
 
@@ -64,7 +64,7 @@ void MainMenu::MoveUp() {
         selectedItemIndex = static_cast<int>(mainMenu.size()) - 1;
     else
         --selectedItemIndex;
-        mainMenu[selectedItemIndex].setFillColor(sf::Color::Red);
+        mainMenu[selectedItemIndex].setFillColor(sf::Color(255, 165, 0));
         mainMenu[selectedItemIndex].setScale({ 1.1f,1.1f });
 }
 
@@ -76,7 +76,7 @@ void MainMenu::MoveDown()
         selectedItemIndex = 0;
     else
         ++selectedItemIndex;
-    mainMenu[selectedItemIndex].setFillColor(sf::Color::Red);
+    mainMenu[selectedItemIndex].setFillColor(sf::Color(255, 165, 0)); // Pomarańczowy
     mainMenu[selectedItemIndex].setScale({ 1.1f,1.1f });
 }
 

@@ -27,6 +27,45 @@ GameMap::GameMap() : currentBackgroundTexture(), font(), tiles(), selectedIndex(
         {900.f, 400.f}   // 12
     };
 
+    // Załaduj tekstury ikonek
+    if (loreIconTexture.loadFromFile("Assets/Media/ikonka_lore.png")) {
+        loreIcon.emplace(loreIconTexture);
+        loreIcon->setPosition(sf::Vector2f(250.f, 140.f));  // Pozycja w lewym górnym rogu
+        loreIcon->setScale(sf::Vector2f(0.5f, 0.5f));     // Skalowanie (dostosuj jeśli potrzeba)
+
+        // Tekst "B" obok ikonki lore
+        loreText.emplace(font);
+        loreText->setString("B");
+        loreText->setCharacterSize(40);
+        loreText->setFillColor(sf::Color::White);
+        loreText->setPosition(sf::Vector2f(320.f, 140.f)); // Obok ikonki
+    }
+
+    if (mapIconTexture.loadFromFile("Assets/Media/ikonka_mapa.png")) {
+        mapIcon.emplace(mapIconTexture);
+        mapIcon->setPosition(sf::Vector2f(250.f, 200.f));  // Pod ikonką lore
+        mapIcon->setScale(sf::Vector2f(0.5f, 0.5f));
+
+        // Tekst "N" obok ikonki mapa
+        mapText.emplace(font);
+        mapText->setString("M");
+        mapText->setCharacterSize(40);
+        mapText->setFillColor(sf::Color::White);
+        mapText->setPosition(sf::Vector2f(320.f, 200.f));
+    }
+
+    if (shopIconTexture.loadFromFile("Assets/Media/ikonka_sklep.png")) {
+        shopIcon.emplace(shopIconTexture);
+        shopIcon->setPosition(sf::Vector2f(250.f, 260.f));  // Pod ikonką mapa
+        shopIcon->setScale(sf::Vector2f(0.5f, 0.5f));
+
+        // Tekst "M" obok ikonki sklep
+        shopText.emplace(font);
+        shopText->setString("N");
+        shopText->setCharacterSize(40);
+        shopText->setFillColor(sf::Color::White);
+        shopText->setPosition(sf::Vector2f(320.f, 260.f));
+    }
 }
 
 void GameMap::setSaveSlot(int slot) {
@@ -127,6 +166,12 @@ void GameMap::handleEvent(const sf::Event& event, int* currentScreen) {
             }
         } else if (key->code == Key::Escape) {
             *currentScreen = *currentScreen - 1; // Cofnij do poprzedniego ekranu (SaveScreen)
+        } else if (key->code == Key::B) {
+            // Przejdź do ekranu Lore (currentScreen 6)
+            *currentScreen = 6;
+        } else if (key->code == Key::N) {
+            // Przejdź do sklepu (currentScreen 4)
+            *currentScreen = 4;
         }
     }
 }
@@ -146,6 +191,28 @@ void GameMap::draw(sf::RenderWindow& window) {
     // Rysuj tiles (liczby) - bez zmiany koloru, tylko tło się zmienia
     for (size_t i = 0; i < tiles.size(); ++i) {
         window.draw(tiles[i]);
+    }
+
+    // Rysuj ikonki
+    if (loreIcon.has_value()) {
+        window.draw(*loreIcon);
+    }
+    if (mapIcon.has_value()) {
+        window.draw(*mapIcon);
+    }
+    if (shopIcon.has_value()) {
+        window.draw(*shopIcon);
+    }
+
+    // Rysuj teksty obok ikonek
+    if (loreText.has_value()) {
+        window.draw(*loreText);
+    }
+    if (mapText.has_value()) {
+        window.draw(*mapText);
+    }
+    if (shopText.has_value()) {
+        window.draw(*shopText);
     }
 }
 

@@ -10,9 +10,9 @@ struct SaveData {
     int scrap;
     int currentLevel;
     int maxLevelUnlocked;
-    std::vector<bool> shopItemsPurchased; // 5 przedmiotów w sklepie
+    std::vector<bool> shopItemsPurchased; // 7 przedmiotów w sklepie
 
-    SaveData() : scrap(0), currentLevel(0), maxLevelUnlocked(0), shopItemsPurchased(5, false) {}
+    SaveData() : scrap(0), currentLevel(0), maxLevelUnlocked(0), shopItemsPurchased(7, false) {}
 
     // Zapisz dane do pliku JSON
     bool saveToFile(const std::string& filename) const {
@@ -28,7 +28,7 @@ struct SaveData {
         file << "  \"maxLevelUnlocked\": " << maxLevelUnlocked << ",\n";
         file << "  \"shopItemsPurchased\": [";
 
-        for (size_t i = 0; i < 5; ++i) {
+        for (size_t i = 0; i < 7; ++i) {
             if (i > 0) file << ", ";
             file << (i < shopItemsPurchased.size() && shopItemsPurchased[i] ? "true" : "false");
         }
@@ -48,7 +48,7 @@ struct SaveData {
 
         // Prosty parser JSON
         std::string line;
-        shopItemsPurchased.resize(5, false);
+        shopItemsPurchased.resize(7, false);
 
         while (std::getline(file, line)) {
             // Usuń białe znaki z początku

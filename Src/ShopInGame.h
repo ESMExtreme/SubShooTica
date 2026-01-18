@@ -5,13 +5,20 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <memory>
 #include "SaveData.h"
 
 struct ShopItem {
     std::string name;
     std::string description;
     int price;
-    bool purchased;
+    int itemIndex; // Indeks w shopItemsPurchased
+    std::shared_ptr<sf::Texture> texture;
+    std::optional<sf::Sprite> sprite;
+    std::optional<sf::Text> nameText;
+    std::optional<sf::Text> priceText;
+    std::optional<sf::Text> statusText; // "Kupiono" lub pusty
+    sf::Vector2f position;
 };
 
 class ShopInGame {
@@ -26,18 +33,36 @@ public:
 
 private:
     sf::Font font;
-    std::vector<ShopItem> items;
-    std::vector<sf::Text> itemTexts;
-    std::vector<sf::RectangleShape> itemBoxes;
-    std::optional<sf::Text> titleText;
     std::optional<sf::Text> scrapText;
-    int selectedIndex;
     int currentSaveSlot;
     SaveData* saveData;
 
-    void createShopItems();
-    void updateDisplay();
-    void purchaseItem();
+    // Tło
+    sf::Texture backgroundTexture;
+    std::optional<sf::Sprite> background;
+
+    // Ikonki (jak na mapie)
+    sf::Texture loreIconTexture;
+    sf::Texture mapIconTexture;
+    sf::Texture shopIconTexture;
+    std::optional<sf::Sprite> loreIcon;
+    std::optional<sf::Sprite> mapIcon;
+    std::optional<sf::Sprite> shopIcon;
+
+    // Teksty przy ikonkach
+    std::optional<sf::Text> loreText;  // "B"
+    std::optional<sf::Text> mapText;   // "M"
+    std::optional<sf::Text> shopText;  // "N"
+
+    // Przedmioty w sklepie
+    std::vector<ShopItem> shopItems;
+    int selectedItemIndex = 0;
+
+    // Tekst instrukcji
+    std::optional<sf::Text> instructionText;
+
+    void initializeShopItems();
+    void updateShopItemsDisplay();
 };
 
 #endif // SHOPINGAME_H

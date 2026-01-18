@@ -136,6 +136,27 @@ void OptionsMenu::keyPressHandler(const sf::Event::KeyPressed* key, int* current
 
 OptionsMenu::OptionsMenu(sf::Music* music) : musicPtr(music)
 {
+    // Załaduj tło background.png
+    if (backgroundTexture.loadFromFile("Assets/Media/background.png")) {
+        backgroundSprite.emplace(backgroundTexture);
+    }
+
+    // Załaduj teksturę opcje_box.png
+    if (boxTexture.loadFromFile("Assets/Media/opcje_box.png")) {
+        // Konfiguracja 1 boxa - pozycja i skala (możesz dostosować)
+        boxConfigs = {
+            {{300.f, 400.f}, {2.0f, 2.0f}}   // Box 0 - pojedynczy box
+        };
+
+        // Utwórz 1 sprite dla boxa
+        for (size_t i = 0; i < 1; ++i) {
+            sf::Sprite boxSprite(boxTexture);
+            boxSprite.setPosition(boxConfigs[i].position);
+            boxSprite.setScale(boxConfigs[i].scale);
+            boxSprites.push_back(boxSprite);
+        }
+    }
+
     std::fstream optionsFile;
     optionsFile.open("Assets/options.txt", std::ios::in);
     if (!optionsFile.good()) {
@@ -194,13 +215,13 @@ OptionsMenu::OptionsMenu(sf::Music* music) : musicPtr(music)
         // Nie udało się załadować czcionki - kontynuuj z domyślną
     }
 
-    CreateTile(std::string("Music volume: ") + std::to_string(tempOptions.musicVolume), sf::Color::Red, {400,100}, 70);
-    CreateTile(std::string("Resolution: ") + std::to_string(resolutions[tempOptions.resolutionIndex].x)+"x"+ std::to_string(resolutions[tempOptions.resolutionIndex].y), sf::Color::White, {400,200}, 70);
-    CreateTile(std::string("Fullscreen: ") + fullscreenOptions[tempOptions.fullscreenIndex], sf::Color::White, {400,300}, 70);
-    CreateTile(std::string("Vsync: ") + VsyncOptions[tempOptions.vsyncIndex], sf::Color::White, { 400,400 }, 70);
-    CreateTile(std::string("FPS Cap: ") + fpsLimits[tempOptions.fpsLimitIndex], sf::Color::White, { 400,500 }, 70);
-	CreateTile(std::string("Apply"), sf::Color::White, { 400,600 }, 70);
-    CreateTile(std::string("Back"), sf::Color::White, { 700,700 }, 70);
+    CreateTile(std::string("Music volume: ") + std::to_string(tempOptions.musicVolume), sf::Color(255, 165, 0), {450,500}, 40);
+    CreateTile(std::string("Resolution: ") + std::to_string(resolutions[tempOptions.resolutionIndex].x)+"x"+ std::to_string(resolutions[tempOptions.resolutionIndex].y), sf::Color::White, {450,600}, 40);
+    CreateTile(std::string("Fullscreen: ") + fullscreenOptions[tempOptions.fullscreenIndex], sf::Color::White, {450,700}, 40);
+    CreateTile(std::string("Vsync: ") + VsyncOptions[tempOptions.vsyncIndex], sf::Color::White, { 950,500 }, 40);
+    CreateTile(std::string("FPS Cap: ") + fpsLimits[tempOptions.fpsLimitIndex], sf::Color::White, { 950,600 }, 40);
+	CreateTile(std::string("Apply"), sf::Color::White, { 950,700 }, 40);
+    CreateTile(std::string("Back"), sf::Color::White, { 800,750 }, 40);
     selectedItemIndex = 0;
 }
 
@@ -216,6 +237,22 @@ void OptionsMenu::CreateTile(std::string string, sf::Color color, sf::Vector2f p
 
 void OptionsMenu::draw(sf::RenderWindow& window)
 {
+    // Rysuj tło background.png
+    if (backgroundSprite.has_value()) {
+        sf::Vector2u windowSize = window.getSize();
+        sf::Vector2u textureSize = backgroundTexture.getSize();
+        float scaleX = static_cast<float>(windowSize.x) / static_cast<float>(textureSize.x);
+        float scaleY = static_cast<float>(windowSize.y) / static_cast<float>(textureSize.y);
+        backgroundSprite->setScale(sf::Vector2f(scaleX, scaleY));
+        window.draw(*backgroundSprite);
+    }
+
+    // Rysuj 1 obrazek opcje_box.png
+    for (const auto& boxSprite : boxSprites) {
+        window.draw(boxSprite);
+    }
+
+    // Rysuj tekst opcji
     for (const auto& item : optionsMenu) {
         window.draw(item);
     }
@@ -227,7 +264,7 @@ void OptionsMenu::MoveUp() {
         selectedItemIndex = static_cast<int>(optionsMenu.size()) - 1;
     else
         --selectedItemIndex;
-    optionsMenu[selectedItemIndex].setFillColor(sf::Color::Red);
+    optionsMenu[selectedItemIndex].setFillColor(sf::Color(255, 165, 0));
 }
 
 void OptionsMenu::MoveDown()
@@ -237,7 +274,7 @@ void OptionsMenu::MoveDown()
         selectedItemIndex = 0;
     else
         ++selectedItemIndex;
-    optionsMenu[selectedItemIndex].setFillColor(sf::Color::Red);
+    optionsMenu[selectedItemIndex].setFillColor(sf::Color(255, 165, 0));
 }
 
 

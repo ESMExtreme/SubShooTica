@@ -4,6 +4,7 @@
 #include <SFML/Audio.hpp>
 #include <vector>
 #include <string>
+#include <optional>
 
 class Options {
 public:
@@ -13,6 +14,11 @@ public:
     int fpsLimit = 60;
     int musicVolume = 50; 
     int sfxVolume = 50;
+};
+
+struct BoxConfig {
+    sf::Vector2f position;
+    sf::Vector2f scale;
 };
 
 class OptionsMenu {
@@ -31,4 +37,13 @@ private:
     sf::Font font;
     std::vector<sf::Text> optionsMenu;
     int selectedItemIndex;
+
+    // Tło
+    sf::Texture backgroundTexture;
+    std::optional<sf::Sprite> backgroundSprite;
+
+    // 7 obrazków opcje_box.png
+    sf::Texture boxTexture;
+    std::vector<sf::Sprite> boxSprites;
+    std::vector<BoxConfig> boxConfigs;
 };

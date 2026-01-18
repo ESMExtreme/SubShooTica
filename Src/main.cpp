@@ -10,10 +10,11 @@
 #include "SaveScreen.h"
 #include "GameMap.h"
 #include "ShopInGame.h"
+#include "Lore.h"
 
 using namespace sf;
 using namespace std;
-int CurrentScreen = 0; // 0 - MainMenu, 1 - OptionsMenu , 2 - SaveScreen , 3-Mapa, 4-ShopInGame, 5-Poziomy
+int CurrentScreen = 0; // 0 - MainMenu, 1 - OptionsMenu , 2 - SaveScreen , 3-Mapa, 4-ShopInGame, 5-Poziomy, 6-Lore
 int PreviousScreen = 0; // Śledź poprzedni ekran
 int currentLevel = 0; // Aktualnie wybrany poziom (0=sklep, 1=level1, 2=level2, itd.)
 
@@ -28,6 +29,7 @@ int main()
     Level1 lvl1;
     Level2 lvl2;
     GameMap map;
+    Lore lore;
 
     sf::Clock clock; 
 
@@ -88,6 +90,10 @@ int main()
                         lvl1.handleEvent(*event, &CurrentScreen);
                     }
                     break;
+                case 6:
+                    // Obsługa zdarzeń dla ekranu Lore
+                    lore.handleEvent(*event, &CurrentScreen);
+                    break;
             }
         }
 
@@ -118,13 +124,16 @@ int main()
                 if (currentLevel == 1) {
                     lvl1.setSaveSlot(slot);
                     lvl1.setLevel(currentLevel);
+                    lvl1.reset(); // Resetuj poziom do stanu początkowego
                 } else if (currentLevel == 2) {
                     lvl2.setSaveSlot(slot);
                     lvl2.setLevel(currentLevel);
+                    lvl2.reset(); // Resetuj poziom do stanu początkowego
                 } else {
                     // Domyślnie poziom 1 dla pozostałych (3-12 można dodać później)
                     lvl1.setSaveSlot(slot);
                     lvl1.setLevel(currentLevel);
+                    lvl1.reset(); // Resetuj poziom do stanu początkowego
                 }
 
             }
@@ -184,6 +193,11 @@ int main()
                     lvl1.update(deltaTime, window.getSize());
                     lvl1.draw(window);
                 }
+                break;
+            case 6:
+                // Rysuj ekran Lore
+                lore.update(deltaTime, window.getSize());
+                lore.draw(window);
                 break;
         }
         window.display();

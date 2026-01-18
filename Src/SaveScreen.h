@@ -2,6 +2,12 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <optional>
+
+struct SaveBoxConfig {
+    sf::Vector2f position;
+    sf::Vector2f scale;
+};
 
 class SaveScreen {
 public:
@@ -19,4 +25,13 @@ private:
     int lastSelectedSlot; // Przechowuje ostatnio wybrany slot (0, 1, lub 2)
     void MoveUp();
     void MoveDown();
+
+    // Tło
+    sf::Texture backgroundTexture;
+    std::optional<sf::Sprite> backgroundSprite;
+
+    // 4 boxy zapis_box.png
+    sf::Texture boxTexture;
+    std::vector<sf::Sprite> boxSprites;
+    std::vector<SaveBoxConfig> boxConfigs;
 };

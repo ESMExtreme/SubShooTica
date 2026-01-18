@@ -1,0 +1,23 @@
+# Plik z wpisami Lore
+# Format: kazdy wpis zaczyna sie od [LOG_X] gdzie X to numer
+# Potem tytul, a w kolejnych liniach tresc (do nastepnego [LOG_X])
+
+[LOG_1]
+Dzien 1 - Pierwsza ekspedycja
+Zanurzyliśmy się dzisiaj na głębokość 500 metrow.
+Woda jest zimna i ciemna, ale systemy łodzi
+działają bez zarzutu. Widziałem dziwne swiatła
+w oddali...
+
+[LOG_2]
+
+[LOG_3]
+
+
+[LOG_4]
+
+[LOG_5]
+
+[LOG_6]
+
+[LOG_7]

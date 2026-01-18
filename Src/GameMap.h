@@ -26,6 +26,19 @@ private:
     int selectedIndex;
     int currentSaveSlot;
     SaveData saveData;
+
+    // Ikonki
+    sf::Texture loreIconTexture;
+    sf::Texture mapIconTexture;
+    sf::Texture shopIconTexture;
+    std::optional<sf::Sprite> loreIcon;
+    std::optional<sf::Sprite> mapIcon;
+    std::optional<sf::Sprite> shopIcon;
+
+    // Teksty przy ikonkach
+    std::optional<sf::Text> loreText;  // "B"
+    std::optional<sf::Text> mapText;   // "N"
+    std::optional<sf::Text> shopText;  // "M"
 };
 
 #endif // GAMEMAP_H

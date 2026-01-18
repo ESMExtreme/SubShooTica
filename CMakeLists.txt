@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+
 include(FetchContent)
 FetchContent_Declare(SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
@@ -26,10 +27,20 @@ add_executable(main ${PROJECT_SOURCES}
         Src/Level2.cpp
         Src/GameMap.cpp
         Src/GameMap.h
+        Src/Lore.h
+        Src/Lore.cpp
         Src/Level1.cpp
-        Src/Level1.cpp)
+        Src/Level1.cpp
+        Src/Lore.cpp)
 
 target_compile_features(main PRIVATE cxx_std_17)
+
+# Flagi UTF-8 - tymczasowo wyłączone z powodu problemów kompilacji dependency
+# if(MSVC)
+#     target_compile_options(main PRIVATE /utf-8)
+# else()
+#     target_compile_options(main PRIVATE -finput-charset=UTF-8)
+# endif()
 
 target_link_libraries(main PRIVATE
     SFML::Graphics
@@ -71,6 +82,20 @@ if(OPTION_FILE)
     endforeach()
 endif()
 
+# --- Lore entries handling ---
+file(GLOB LORE_FILE CONFIGURE_DEPENDS "${ASSETS_DIR}/lore_entries.txt")
+if(LORE_FILE)
+    add_custom_command(TARGET main POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/Assets"
+    )
+    foreach(_lore ${LORE_FILE})
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_lore}" "$<TARGET_FILE_DIR:main>/Assets"
+            COMMENT "Copying lore_entries.txt to runtime output"
+        )
+    endforeach()
+endif()
+
 # --- JSON save files handling ---
 # Copy save*.json files
 file(GLOB JSON_SAVE_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/save*.json")
@@ -93,6 +118,25 @@ if(MAP_FILES)
         add_custom_command(TARGET main POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_map}" "$<TARGET_FILE_DIR:main>/Assets/Media/${_rel_dir}"
             COMMENT "Copying map background ${_map} to runtime output"
+        )
+    endforeach()
+endif()
+
+# --- Shop items handling ---
+# Copy shop item images to preserve directory structure
+file(GLOB SHOP_ITEM_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/Media/shop_items/*.png")
+
+if(SHOP_ITEM_FILES)
+    # Ensure destination directory exists
+    add_custom_command(TARGET main POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/Assets/Media/shop_items"
+    )
+    # Copy each shop item file
+    foreach(_shop_item ${SHOP_ITEM_FILES})
+        get_filename_component(_item_name "${_shop_item}" NAME)
+        add_custom_command(TARGET main POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_shop_item}" "$<TARGET_FILE_DIR:main>/Assets/Media/shop_items/${_item_name}"
+            COMMENT "Copying shop item ${_item_name} to runtime output"
         )
     endforeach()
 endif()
