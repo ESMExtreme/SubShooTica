@@ -51,17 +51,28 @@ Level1::Level1() : sprite(texture), currentSaveSlot(0) {
     scrapText->setString("Zlom: 0");
 
     // Inicjalizacja okrągłego paska HP
-    hpCircle.setRadius(100.f); // Promień większy niż kulka gracza (70) - oddalony
+    hpCircle.setRadius(70.f); // Zmniejszony promień
     hpCircle.setPointCount(100); // Więcej punktów = płynniejszy okrąg
     hpCircle.setFillColor(sf::Color::Transparent);
-    hpCircle.setOutlineThickness(8.f);
+    hpCircle.setOutlineThickness(12.f); // Pogrubiony (było 8)
     hpCircle.setOutlineColor(sf::Color::Green);
-    hpCircle.setOrigin(sf::Vector2f(100.f, 100.f)); // Środek okręgu
+    hpCircle.setOrigin(sf::Vector2f(70.f, 270.f)); // Środek okręgu
+
+    // Inicjalizacja wewnętrznego wypełnionego koła
+    hpInnerCircle.setRadius(58.f); // Mniejszy odstęp
+    hpInnerCircle.setPointCount(100);
+    hpInnerCircle.setFillColor(sf::Color(101, 180, 179)); // RGB(101, 180, 179)
+    hpInnerCircle.setOrigin(sf::Vector2f(58.f, 58.f)); // Środek okręgu
 
     // Inicjalizacja hpText (SFML 3 wymaga Font w konstruktorze)
-    hpText.emplace(font, "HP: 10/10", 25);
+    hpText.emplace(font, "10/10", 20);
     hpText->setFillColor(sf::Color::White);
-    hpText->setPosition(sf::Vector2f(120.f, 52.f));
+    hpText->setPosition(sf::Vector2f(75.f, 170.f)); // Przesunięte do góry (było 220)
+
+    // Inicjalizacja tekstu "Zdrowie"
+    oxygenText.emplace(font, "Zdrowie", 25); // Tekst "Zdrowie"
+    oxygenText->setFillColor(sf::Color::White);
+    oxygenText->setStyle(sf::Text::Bold);
 
     // Inicjalizacja ekranu Game Over
     gameOverOverlay.setSize(sf::Vector2f(1920.f, 1080.f)); // Rozmiar ekranu
@@ -157,9 +168,9 @@ void Level1::update(float deltaTime, sf::Vector2u windowSize) {
     sf::Vector2f ballPos = ball.getPosition();
     float ballRadius = ball.getRadius();
 
-    // Ograniczenie lewo
-    if (ballPos.x - ballRadius < 0.f) {
-        ball.setPosition(sf::Vector2f(ballRadius, ballPos.y));
+    // Ograniczenie lewo (przesunięte o 20px więcej w lewo)
+    if (ballPos.x - ballRadius < -50.f) {
+        ball.setPosition(sf::Vector2f(ballRadius - 50.f, ballPos.y));
         velocity.x = 0.f; // Zatrzymaj ruch w lewo
     }
     // Ograniczenie prawo
@@ -386,7 +397,7 @@ void Level1::update(float deltaTime, sf::Vector2u windowSize) {
                 hpCircle.setOutlineColor(sf::Color::Red);
             }
 
-            hpText->setString("HP: " + std::to_string(currentHP) + "/" + std::to_string(maxHP));
+            hpText->setString(std::to_string(currentHP) + "/" + std::to_string(maxHP));
 
             // Usuń wroga po kolizji
             enemyIt = enemies.erase(enemyIt);
@@ -444,12 +455,21 @@ void Level1::draw(sf::RenderWindow& window) {
     }
 
     // Rysuj okrągły pasek HP w stałej pozycji (lewy górny róg)
-    sf::Vector2f hpPosition(150.f, 100.f); // Stała pozycja na ekranie
+    sf::Vector2f hpPosition(100.f, 150.f); // Przesunięte: 50px do góry (było 200)
 
-    // Rysuj pełny okrąg jako tło (szary)
-    sf::CircleShape hpBackground = hpCircle;
-    hpBackground.setPosition(hpPosition);
+    // Rysuj wewnętrzne wypełnione koło (RGB 101, 180, 179)
+    hpInnerCircle.setPosition(hpPosition);
+    window.draw(hpInnerCircle);
+
+    // Rysuj pełny okrąg jako tło (szary) - dopasowany do nowych rozmiarów
+    sf::CircleShape hpBackground;
+    hpBackground.setRadius(70.f); // Dopasowany promień
+    hpBackground.setPointCount(100);
+    hpBackground.setFillColor(sf::Color::Transparent);
+    hpBackground.setOutlineThickness(12.f); // Pogrubiony (było 8)
     hpBackground.setOutlineColor(sf::Color(80, 80, 80, 150)); // Szare tło
+    hpBackground.setOrigin(sf::Vector2f(70.f, 70.f));
+    hpBackground.setPosition(hpPosition);
     window.draw(hpBackground);
 
     // Rysuj łuk HP (tylko część odpowiadającą aktualnemu HP)
@@ -459,8 +479,8 @@ void Level1::draw(sf::RenderWindow& window) {
     const int segments = static_cast<int>(100 * hpPercentage); // Liczba segmentów zależna od HP
     sf::VertexArray hpArc(sf::PrimitiveType::TriangleStrip);
 
-    float radius = 100.f; // Zwiększony promień - odsunięty od gracza
-    float thickness = 8.f;
+    float radius = 70.f; // Dopasowany promień
+    float thickness = 12.f; // Pogrubiony (było 8)
     float angleRange = 360.f * hpPercentage; // Kąt łuku w stopniach
 
     sf::Color hpColor;
@@ -493,6 +513,16 @@ void Level1::draw(sf::RenderWindow& window) {
     }
 
     window.draw(hpArc);
+
+    // Rysuj tekst "Zdrowie" w środku koła - przesunięty wyżej
+    if (oxygenText.has_value()) {
+        // Wyśrodkuj tekst
+        sf::FloatRect textBounds = oxygenText->getLocalBounds();
+        oxygenText->setOrigin(sf::Vector2f(textBounds.size.x / 2.f, textBounds.size.y / 2.f));
+        // Przesunięty wyżej - nad tekstem HP
+        oxygenText->setPosition(sf::Vector2f(hpPosition.x, hpPosition.y - 25.f));
+        window.draw(*oxygenText);
+    }
 
     if (hpText.has_value()) {
         window.draw(*hpText);
@@ -537,8 +567,17 @@ void Level1::saveGame() {
 
 void Level1::setLevel(int level) {
     background_1.difficultyLevel = level;
-    std::string bgFile = "Assets/Media/background" + std::to_string(level) + ".png";
+
+    // Dla poziomu 0 (tutorial) użyj tła z folderu tutorial
+    std::string bgFile;
+    if (level == 0) {
+        bgFile = "Assets/Media/tutorial/background0.png";
+    } else {
+        bgFile = "Assets/Media/background" + std::to_string(level) + ".png";
+    }
+
     if (!background_1.texture.loadFromFile(bgFile)) {
+        // Fallback do background1.png jeśli nie ma odpowiedniego tła
         if (level != 1) {
             std::string fallback = "Assets/Media/background1.png";
             if (background_1.texture.loadFromFile(fallback)) {
@@ -647,6 +686,6 @@ void Level1::reset() {
     hpCircle.setOutlineColor(sf::Color::Green);
 
     if (hpText.has_value()) {
-        hpText->setString("HP: " + std::to_string(currentHP) + "/" + std::to_string(maxHP));
+        hpText->setString(std::to_string(currentHP) + "/" + std::to_string(maxHP));
     }
 }

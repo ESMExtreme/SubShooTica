@@ -25,12 +25,11 @@ add_executable(main ${PROJECT_SOURCES}
         Src/Level1.cpp
         Src/Level2.h
         Src/Level2.cpp
+        Src/Tutorial.h
+        Src/Tutorial.cpp
         Src/GameMap.cpp
         Src/GameMap.h
         Src/Lore.h
-        Src/Lore.cpp
-        Src/Level1.cpp
-        Src/Level1.cpp
         Src/Lore.cpp)
 
 target_compile_features(main PRIVATE cxx_std_17)

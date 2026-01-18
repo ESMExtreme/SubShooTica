@@ -5,6 +5,7 @@
 
 #include "Level1.h"
 #include "Level2.h"
+#include "Tutorial.h"
 #include "MainMenu.h"
 #include "OptionsMenu.h"
 #include "SaveScreen.h"
@@ -14,9 +15,9 @@
 
 using namespace sf;
 using namespace std;
-int CurrentScreen = 0; // 0 - MainMenu, 1 - OptionsMenu , 2 - SaveScreen , 3-Mapa, 4-ShopInGame, 5-Poziomy, 6-Lore
+int CurrentScreen = 0; // 0 - MainMenu, 1 - OptionsMenu , 2 - SaveScreen , 3-Mapa, 4-ShopInGame, 5-Poziomy (0-12), 6-Lore
 int PreviousScreen = 0; // Śledź poprzedni ekran
-int currentLevel = 0; // Aktualnie wybrany poziom (0=sklep, 1=level1, 2=level2, itd.)
+int currentLevel = 0; // Aktualnie wybrany poziom (0=tutorial, 1=level1, 2=level2, itd.)
 
 int main()
 {
@@ -26,6 +27,7 @@ int main()
 	OptionsMenu optionsMenu(&menuMusic);
     SaveScreen saveScreen;
     ShopInGame shop;
+    Tutorial tutorial;
     Level1 lvl1;
     Level2 lvl2;
     GameMap map;
@@ -82,7 +84,10 @@ int main()
                     break;
                 case 5:
                     // Obsługa zdarzeń dla odpowiedniego poziomu
-                    if (currentLevel == 1) {
+                    if (currentLevel == 0) {
+                        // Poziom 0 - Tutorial
+                        tutorial.handleEvent(*event, &CurrentScreen);
+                    } else if (currentLevel == 1) {
                         lvl1.handleEvent(*event, &CurrentScreen);
                     } else if (currentLevel == 2) {
                         lvl2.handleEvent(*event, &CurrentScreen);
@@ -116,12 +121,16 @@ int main()
                 shop.loadFromSaveData(lvl1.getSaveData());
 
             } else if (PreviousScreen == 3 && CurrentScreen == 5) {
-                // Przejście z GameMap do poziomów (1-12)
+                // Przejście z GameMap do poziomów (0-12)
                 int slot = map.getSaveSlot();
                 currentLevel = map.getSelectedLevel();
 
                 // Wybierz odpowiedni poziom
-                if (currentLevel == 1) {
+                if (currentLevel == 0) {
+                    // Poziom 0 - Tutorial
+                    tutorial.setSaveSlot(slot);
+                    tutorial.reset();
+                } else if (currentLevel == 1) {
                     lvl1.setSaveSlot(slot);
                     lvl1.setLevel(currentLevel);
                     lvl1.reset(); // Resetuj poziom do stanu początkowego
@@ -183,7 +192,11 @@ int main()
                 break;
              case 5:
                 // Rysuj odpowiedni poziom
-                if (currentLevel == 1) {
+                if (currentLevel == 0) {
+                    // Poziom 0 - Tutorial
+                    tutorial.update(deltaTime, window.getSize());
+                    tutorial.draw(window);
+                } else if (currentLevel == 1) {
                     lvl1.update(deltaTime, window.getSize());
                     lvl1.draw(window);
                 } else if (currentLevel == 2) {

@@ -158,12 +158,8 @@ void GameMap::handleEvent(const sf::Event& event, int* currentScreen) {
                 return; // Nie pozwól wejść do zablokowanego levelu
             }
 
-            // Wybór poziomu w zależności od selectedIndex
-            if (selectedIndex == 0) {
-                *currentScreen = 4; // Poziom 0 - Sklep
-            } else {
-                *currentScreen = 5; // Poziomy 1-12 - bezpośrednio do gry
-            }
+            // Wszystkie poziomy (0-12) przechodzą do gry
+            *currentScreen = 5; // Poziomy 0-12 - bezpośrednio do gry
         } else if (key->code == Key::Escape) {
             *currentScreen = *currentScreen - 1; // Cofnij do poprzedniego ekranu (SaveScreen)
         } else if (key->code == Key::B) {

@@ -73,7 +73,9 @@ private:
     int maxHP = 10;
     int currentHP = 10;
     sf::CircleShape hpCircle; // Okrągły pasek HP wokół gracza
+    sf::CircleShape hpInnerCircle; // Wewnętrzne wypełnione koło
     std::optional<sf::Text> hpText;
+    std::optional<sf::Text> oxygenText; // Tekst O₂ w środku koła
 
     // Game Over
     bool isGameOver = false;

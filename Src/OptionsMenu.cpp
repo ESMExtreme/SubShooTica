@@ -103,7 +103,6 @@ void OptionsMenu::keyPressHandler(const sf::Event::KeyPressed* key, int* current
     if (key->code == Key::Enter) {
         switch (selectedItemIndex) {
         case 5:
-            // Apply - zapisz ustawienia
             optionsList.resolution = resolutions[tempOptions.resolutionIndex];
             optionsList.fullscreen = (tempOptions.fullscreenIndex == 0) ? 1 : 0;
             optionsList.vsync = (tempOptions.vsyncIndex == 0) ? 1 : 0;
