@@ -120,6 +120,7 @@ int main()
 
                 // Wczytaj dane gry (zawiera złom i dane sklepu)
                 lvl1.setSaveSlot(slot);
+                lvl1.applyShopBonuses(); // Zastosuj bonusy ze sklepu
 
                 // Ustaw slot i wczytaj dane sklepu z SaveData
                 shop.setSaveSlot(slot);
@@ -137,15 +138,18 @@ int main()
                     tutorial.reset();
                 } else if (currentLevel == 1) {
                     lvl1.setSaveSlot(slot);
+                    lvl1.applyShopBonuses(); // Zastosuj bonusy ze sklepu
                     lvl1.setLevel(currentLevel);
                     lvl1.reset(); // Resetuj poziom do stanu początkowego
                 } else if (currentLevel == 2) {
                     lvl2.setSaveSlot(slot);
+                    lvl2.applyShopBonuses(); // Zastosuj bonusy ze sklepu
                     lvl2.setLevel(currentLevel);
                     lvl2.reset(); // Resetuj poziom do stanu początkowego
                 } else {
                     // Domyślnie poziom 1 dla pozostałych (3-12 można dodać później)
                     lvl1.setSaveSlot(slot);
+                    lvl1.applyShopBonuses(); // Zastosuj bonusy ze sklepu
                     lvl1.setLevel(currentLevel);
                     lvl1.reset(); // Resetuj poziom do stanu początkowego
                 }

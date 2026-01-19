@@ -63,6 +63,7 @@ private:
 
     void initializeShopItems();
     void updateShopItemsDisplay();
+    void applyShopBonus(int itemIndex); // Zastosuj efekt przedmiotu
 };
 
 #endif // SHOPINGAME_H

@@ -49,6 +49,7 @@ public:
     SaveData* getSaveData() { return &saveData; }
     void setLevel(int level);
     void reset(); // Resetuje poziom do stanu początkowego
+    void applyShopBonuses(); // Zastosuj bonusy ze sklepu
 
 private:
     Background background_1;
@@ -77,10 +78,29 @@ private:
     std::optional<sf::Text> hpText;
     std::optional<sf::Text> oxygenText; // Tekst O₂ w środku koła
 
+    // Bonusy ze sklepu
+    bool hasTripleShoot = false;
+    int damageBonus = 0;
+    float fireRateBonus = 0.0f; // Zmniejszenie cooldown'u
+    int hpBonus = 0;
+
     // Game Over
     bool isGameOver = false;
     sf::RectangleShape gameOverOverlay;  // Zaciemnienie ekranu
     std::optional<sf::Text> gameOverText;
+
+    // Progress bar (pasek postępu)
+    sf::Texture progressBarTexture;
+    sf::Texture progressBarFillTexture;
+    std::optional<sf::Sprite> progressBarBackground;
+    std::optional<sf::Sprite> progressBarFill;
+    std::optional<sf::Text> progressText;
+    int totalEnemies = 0; // Łącznie wrogów do pokonania
+    int enemiesKilled = 0; // Wrogów pokonanych
+    bool levelCompleted = false; // Czy poziom ukończony
+    sf::RectangleShape levelCompleteOverlay; // Zaciemnienie po wygranej
+    std::optional<sf::Text> victoryText; // Tekst wygranej
+    std::optional<sf::Text> pressEnterText; // Instrukcja "Naciśnij Enter"
 
     // UI złomu
     sf::Font font;

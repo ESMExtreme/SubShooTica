@@ -62,8 +62,10 @@ private:
     // Pasek postępu (pomarańczowy)
     int totalEnemies = 2; // Łącznie przeciwników w tutorialu
     int enemiesKilled = 0; // Ilu przeciwników zabito
-    sf::RectangleShape progressBarBackground;
-    sf::RectangleShape progressBarFill;
+    sf::Texture progressBarTexture;
+    sf::Texture progressBarFillTexture;
+    std::optional<sf::Sprite> progressBarBackground;
+    std::optional<sf::Sprite> progressBarFill;
     std::optional<sf::Text> progressText;
 
     // Napis "Wygrałeś"

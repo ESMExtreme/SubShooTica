@@ -166,24 +166,31 @@ Tutorial::Tutorial() : currentSaveSlot(0) {
     shootableEnemy2.hp = 3;
     shootableEnemy2.isActive = false; // Nieaktywny na początku
 
-    // Inicjalizacja paska postępu (pomarańczowy)
-    progressBarBackground.setSize(sf::Vector2f(400.f, 30.f));
-    progressBarBackground.setFillColor(sf::Color(50, 50, 50)); // Ciemny szary
-    progressBarBackground.setPosition(sf::Vector2f(760.f, 50.f)); // Góra środek ekranu
-    progressBarBackground.setOutlineThickness(3.f);
-    progressBarBackground.setOutlineColor(sf::Color::White);
+    // Inicjalizacja paska postępu (z teksturami)
+    if (!progressBarTexture.loadFromFile("Assets/Media/progresbar.png")) {
+        // Fallback jeśli brakuje tekstury
+        progressBarTexture.loadFromFile("Assets/Media/background1.png");
+    }
+    if (!progressBarFillTexture.loadFromFile("Assets/Media/progresbar2.png")) {
+        // Fallback jeśli brakuje tekstury
+        progressBarFillTexture.loadFromFile("Assets/Media/background1.png");
+    }
 
-    progressBarFill.setSize(sf::Vector2f(0.f, 30.f)); // Zaczyna pusty
-    progressBarFill.setFillColor(sf::Color(255, 140, 0)); // Pomarańczowy
-    progressBarFill.setPosition(sf::Vector2f(760.f, 50.f));
+    progressBarBackground.emplace(progressBarTexture);
+    progressBarBackground->setPosition(sf::Vector2f(760.f, 50.f));
 
-    progressText.emplace(font, "Postep: 0/2", 25);
+    progressBarFill.emplace(progressBarFillTexture);
+    progressBarFill->setPosition(sf::Vector2f(760.f, 50.f)); // Te same współrzędne
+    // Ustaw teksturę na pełny rozmiar na początku, będziemy ograniczać prostokąt tekstury
+    progressBarFill->setTextureRect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(0, static_cast<int>(progressBarFillTexture.getSize().y))));
+
+    progressText.emplace(font, "Tutorial", 25);
     progressText->setFillColor(sf::Color::White);
     progressText->setStyle(sf::Text::Bold);
-    progressText->setPosition(sf::Vector2f(820.f, 90.f));
+    progressText->setPosition(sf::Vector2f(910.f, 60.f));
 
     // Inicjalizacja napisu "Wygrałeś"
-    victoryText.emplace(font, "Wygra" "\xC5\x82" "es!", 80); // "Wygrałeś" z polskim ł
+    victoryText.emplace(font, "Wygrales!", 80); // "Wygrałeś" z polskim ł
     victoryText->setFillColor(sf::Color::Green);
     victoryText->setStyle(sf::Text::Bold);
     sf::FloatRect victoryBounds = victoryText->getLocalBounds();
@@ -438,10 +445,13 @@ void Tutorial::update(float deltaTime, sf::Vector2u windowSize) {
 
         // Aktualizuj pasek postępu
         float progressPercentage = static_cast<float>(enemiesKilled) / static_cast<float>(totalEnemies);
-        progressBarFill.setSize(sf::Vector2f(400.f * progressPercentage, 30.f));
+        if (progressBarFill.has_value()) {
+            int fillWidth = static_cast<int>(progressBarFillTexture.getSize().x * progressPercentage);
+            progressBarFill->setTextureRect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(fillWidth, static_cast<int>(progressBarFillTexture.getSize().y))));
+        }
 
         if (progressText.has_value()) {
-            progressText->setString("Postep: " + std::to_string(enemiesKilled) + "/" + std::to_string(totalEnemies));
+            // Tekst pozostaje na "Tutorial" - nie aktualizujemy licznika
         }
 
         // Sprawdź czy ukończono poziom (wszyscy przeciwnicy zabici)
@@ -551,8 +561,12 @@ void Tutorial::draw(sf::RenderWindow& window) {
         }
 
         // Rysuj pasek postępu (tylko w fazie 2)
-        window.draw(progressBarBackground);
-        window.draw(progressBarFill);
+        if (progressBarFill.has_value()) {
+            window.draw(*progressBarFill);
+        }
+        if (progressBarBackground.has_value()) {
+            window.draw(*progressBarBackground);
+        }
         if (progressText.has_value()) {
             window.draw(*progressText);
         }

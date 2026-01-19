@@ -13,6 +13,12 @@ struct SaveData {
     std::vector<bool> shopItemsPurchased; // 7 przedmiotów w sklepie
     bool tutorialCompleted; // Czy tutorial został ukończony
 
+    // Bonusy ze sklepu
+    bool tripleShoot = false; // Item 0: Triple shoot
+    int damageBoost = 0; // Item 1: +3 damage
+    float fireRateBonus = 0.0f; // Items 2, 5: -0.15s cooldown (total -0.30s if both bought)
+    int hpBonus = 0; // Items 3, 4: +5 HP each (total +10 if both bought)
+
     SaveData() : scrap(0), currentLevel(0), maxLevelUnlocked(0), shopItemsPurchased(7, false), tutorialCompleted(false) {}
 
     // Zapisz dane do pliku JSON
@@ -35,7 +41,11 @@ struct SaveData {
             file << (i < shopItemsPurchased.size() && shopItemsPurchased[i] ? "true" : "false");
         }
 
-        file << "]\n";
+        file << "],\n";
+        file << "  \"tripleShoot\": " << (tripleShoot ? "true" : "false") << ",\n";
+        file << "  \"damageBoost\": " << damageBoost << ",\n";
+        file << "  \"fireRateBonus\": " << fireRateBonus << ",\n";
+        file << "  \"hpBonus\": " << hpBonus << "\n";
         file << "}\n";
         file.close();
         return true;
@@ -157,6 +167,58 @@ struct SaveData {
                         else {
                             pos++;
                         }
+                    }
+                }
+            }
+            else if (line.find("\"tripleShoot\"") != std::string::npos) {
+                if (line.find("true") != std::string::npos) {
+                    tripleShoot = true;
+                } else {
+                    tripleShoot = false;
+                }
+            }
+            else if (line.find("\"damageBoost\"") != std::string::npos) {
+                size_t pos = line.find(":");
+                if (pos != std::string::npos) {
+                    std::string value = line.substr(pos + 1);
+                    size_t numStart = value.find_first_of("0123456789-");
+                    if (numStart != std::string::npos) {
+                        size_t numEnd = value.find_first_not_of("0123456789-", numStart);
+                        if (numEnd != std::string::npos) {
+                            value = value.substr(numStart, numEnd - numStart);
+                        } else {
+                            value = value.substr(numStart);
+                        }
+                        try {
+                            damageBoost = std::stoi(value);
+                        } catch (...) {}
+                    }
+                }
+            }
+            else if (line.find("\"fireRateBonus\"") != std::string::npos) {
+                size_t pos = line.find(":");
+                if (pos != std::string::npos) {
+                    std::string value = line.substr(pos + 1);
+                    try {
+                        fireRateBonus = std::stof(value);
+                    } catch (...) {}
+                }
+            }
+            else if (line.find("\"hpBonus\"") != std::string::npos) {
+                size_t pos = line.find(":");
+                if (pos != std::string::npos) {
+                    std::string value = line.substr(pos + 1);
+                    size_t numStart = value.find_first_of("0123456789-");
+                    if (numStart != std::string::npos) {
+                        size_t numEnd = value.find_first_not_of("0123456789-", numStart);
+                        if (numEnd != std::string::npos) {
+                            value = value.substr(numStart, numEnd - numStart);
+                        } else {
+                            value = value.substr(numStart);
+                        }
+                        try {
+                            hpBonus = std::stoi(value);
+                        } catch (...) {}
                     }
                 }
             }

@@ -67,7 +67,7 @@ Level1::Level1() : sprite(texture), currentSaveSlot(0) {
     // Inicjalizacja hpText (SFML 3 wymaga Font w konstruktorze)
     hpText.emplace(font, "10/10", 20);
     hpText->setFillColor(sf::Color::White);
-    hpText->setPosition(sf::Vector2f(75.f, 170.f)); // Przesunięte do góry (było 220)
+    hpText->setPosition(sf::Vector2f(75.f, 190.f)); // Przesunięte niżej
 
     // Inicjalizacja tekstu "Zdrowie"
     oxygenText.emplace(font, "Zdrowie", 25); // Tekst "Zdrowie"
@@ -82,11 +82,67 @@ Level1::Level1() : sprite(texture), currentSaveSlot(0) {
     gameOverText.emplace(font, "GAME OVER\n\nNacisnij SPACJE aby wrocic do mapy", 60);
     gameOverText->setFillColor(sf::Color::Red);
     gameOverText->setPosition(sf::Vector2f(500.f, 400.f)); // Środek ekranu
+
+    // Inicjalizacja progress bar
+    if (!progressBarTexture.loadFromFile("Assets/Media/progresbar.png")) {
+        progressBarTexture.loadFromFile("Assets/Media/background1.png");
+    }
+    if (!progressBarFillTexture.loadFromFile("Assets/Media/progresbar2.png")) {
+        progressBarFillTexture.loadFromFile("Assets/Media/background1.png");
+    }
+
+    progressBarBackground.emplace(progressBarTexture);
+    progressBarBackground->setPosition(sf::Vector2f(760.f, 50.f));
+
+    progressBarFill.emplace(progressBarFillTexture);
+    progressBarFill->setPosition(sf::Vector2f(760.f, 50.f));
+    progressBarFill->setTextureRect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(0, static_cast<int>(progressBarFillTexture.getSize().y))));
+
+    progressText.emplace(font, "Poziom 1", 25);
+    progressText->setFillColor(sf::Color::White);
+    progressText->setStyle(sf::Text::Bold);
+    progressText->setPosition(sf::Vector2f(910.f, 60.f));
+
+    // Inicjalizacja ekranu zwycięstwa
+    levelCompleteOverlay.setSize(sf::Vector2f(1920.f, 1080.f));
+    levelCompleteOverlay.setFillColor(sf::Color(0, 0, 0, 150));
+    levelCompleteOverlay.setPosition(sf::Vector2f(0.f, 0.f));
+
+    victoryText.emplace(font, "Poziom Ukoczony!", 80);
+    victoryText->setFillColor(sf::Color::Green);
+    victoryText->setStyle(sf::Text::Bold);
+    sf::FloatRect victoryBounds = victoryText->getLocalBounds();
+    victoryText->setOrigin(sf::Vector2f(victoryBounds.size.x / 2.f, victoryBounds.size.y / 2.f));
+    victoryText->setPosition(sf::Vector2f(960.f, 480.f));
+
+    pressEnterText.emplace(font, "Nacisnij Enter aby kontynuowac", 40);
+    pressEnterText->setFillColor(sf::Color::White);
+    pressEnterText->setStyle(sf::Text::Bold);
+    sf::FloatRect enterBounds = pressEnterText->getLocalBounds();
+    pressEnterText->setOrigin(sf::Vector2f(enterBounds.size.x / 2.f, enterBounds.size.y / 2.f));
+    pressEnterText->setPosition(sf::Vector2f(960.f, 600.f));
 }
 
 void Level1::handleEvent(const sf::Event& event, int* currentScreen) {
     if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
         using Key = sf::Keyboard::Key;
+
+        // Obsługa ukończenia poziomu - powrót do mapy po Enter
+        if (levelCompleted && key->code == Key::Enter) {
+            // Odblokuj następny poziom
+            if (saveData.maxLevelUnlocked < 2) {
+                saveData.maxLevelUnlocked = 2;
+            }
+            saveGame();
+            reset();
+            *currentScreen = 3; // Wróć do mapy
+            return;
+        }
+
+        // Jeśli poziom ukończony, ignoruj inne klawisze
+        if (levelCompleted) {
+            return;
+        }
 
         // Obsługa Game Over - powrót do mapy po spacji
         if (isGameOver && key->code == Key::Space) {
@@ -136,8 +192,8 @@ void Level1::handleEvent(const sf::Event& event, int* currentScreen) {
 }
 
 void Level1::update(float deltaTime, sf::Vector2u windowSize) {
-    // Jeśli Game Over, nie aktualizuj gry
-    if (isGameOver) {
+    // Jeśli poziom ukończony lub Game Over, nie aktualizuj gry
+    if (isGameOver || levelCompleted) {
         return;
     }
 
@@ -153,13 +209,37 @@ void Level1::update(float deltaTime, sf::Vector2u windowSize) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && shootCooldown <= 0.f) {
         // Stwórz pocisk
         float playerVelX = velocity.x;
+
+        // Główny pocisk
         Bullet bullet;
         bullet.shape.setRadius(5.f);
         bullet.shape.setFillColor(sf::Color::Red);
         bullet.shape.setPosition(sf::Vector2f(ball.getPosition().x + ball.getRadius(), ball.getPosition().y));
         bullet.velocity = sf::Vector2f(playerVelX * 0.02f, -300.f);
         bullets.push_back(bullet);
-        shootCooldown = 0.15f; // Cooldown 150ms między strzałami
+
+        // Triple shoot - dodaj pociski w kierunkach bocznych
+        if (hasTripleShoot) {
+            // Pocisk w lewo
+            Bullet bulletLeft;
+            bulletLeft.shape.setRadius(5.f);
+            bulletLeft.shape.setFillColor(sf::Color::Red);
+            bulletLeft.shape.setPosition(sf::Vector2f(ball.getPosition().x, ball.getPosition().y));
+            bulletLeft.velocity = sf::Vector2f(-100.f, -300.f);
+            bullets.push_back(bulletLeft);
+
+            // Pocisk w prawo
+            Bullet bulletRight;
+            bulletRight.shape.setRadius(5.f);
+            bulletRight.shape.setFillColor(sf::Color::Red);
+            bulletRight.shape.setPosition(sf::Vector2f(ball.getPosition().x + ball.getRadius() + 20.f, ball.getPosition().y));
+            bulletRight.velocity = sf::Vector2f(100.f, -300.f);
+            bullets.push_back(bulletRight);
+        }
+
+        // Stosuj fire rate bonus - zmniejsz cooldown
+        float baseCooldown = 0.45f;
+        shootCooldown = baseCooldown - fireRateBonus;
     }
 
     ball.move(velocity * deltaTime);
@@ -350,8 +430,8 @@ void Level1::update(float deltaTime, sf::Vector2u windowSize) {
                 enemyIt->shape.getGlobalBounds();
 
             if (enemyBounds.contains(bulletIt->shape.getPosition())) {
-                // Zmniejsz HP wroga
-                enemyIt->hp--;
+                // Zmniejsz HP wroga + dodaj damageBoost
+                enemyIt->hp -= (1 + damageBonus);
                 bulletDestroyed = true;
 
                 // Usuń wroga jeśli HP <= 0
@@ -361,6 +441,22 @@ void Level1::update(float deltaTime, sf::Vector2u windowSize) {
                     if (scrapText.has_value()) {
                         scrapText->setString("Zlom: " + std::to_string(saveData.scrap));
                     }
+
+                    // Zwiększ licznik zabitych i aktualizuj progress bar
+                    enemiesKilled++;
+
+                    // Aktualizuj progress bar
+                    if (totalEnemies > 0 && progressBarFill.has_value()) {
+                        float progressPercentage = static_cast<float>(enemiesKilled) / static_cast<float>(totalEnemies);
+                        int fillWidth = static_cast<int>(progressBarFillTexture.getSize().x * progressPercentage);
+                        progressBarFill->setTextureRect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(fillWidth, static_cast<int>(progressBarFillTexture.getSize().y))));
+                    }
+
+                    // Sprawdź czy poziom ukończony
+                    if (enemiesKilled >= totalEnemies && totalEnemies > 0) {
+                        levelCompleted = true;
+                    }
+
                     enemyIt = enemies.erase(enemyIt);
                 } else {
                     ++enemyIt;
@@ -528,6 +624,28 @@ void Level1::draw(sf::RenderWindow& window) {
         window.draw(*hpText);
     }
 
+    // Rysuj pasek postępu
+    if (progressBarFill.has_value()) {
+        window.draw(*progressBarFill);
+    }
+    if (progressBarBackground.has_value()) {
+        window.draw(*progressBarBackground);
+    }
+    if (progressText.has_value()) {
+        window.draw(*progressText);
+    }
+
+    // Rysuj ekran wygranej jeśli poziom ukończony
+    if (levelCompleted) {
+        window.draw(levelCompleteOverlay);
+        if (victoryText.has_value()) {
+            window.draw(*victoryText);
+        }
+        if (pressEnterText.has_value()) {
+            window.draw(*pressEnterText);
+        }
+    }
+
     // Rysuj ekran Game Over jeśli gra się skończyła
     if (isGameOver && gameOverText.has_value()) {
         window.draw(gameOverOverlay);
@@ -606,6 +724,8 @@ void Level1::loadEnemyConfig(int level) {
 
     enemyConfig.enemyTypes.clear();
     std::map<int, EnemyTypeConfig> tempEnemyTypes;
+    totalEnemies = 0; // Reset licznika
+    enemiesKilled = 0; // Reset zabitych
 
     std::string line;
     while (std::getline(file, line)) {
@@ -625,6 +745,7 @@ void Level1::loadEnemyConfig(int level) {
             enemyConfig.spawnInterval = std::stof(value);
         } else if (key == "max_enemies") {
             enemyConfig.maxEnemies = std::stoi(value);
+            totalEnemies = enemyConfig.maxEnemies; // Ustaw całkowitą liczbę wrogów
         } else if (key.find("enemy") == 0) {
             size_t underscorePos = key.find('_');
             if (underscorePos != std::string::npos) {
@@ -667,6 +788,7 @@ void Level1::reset() {
     // Reset HP
     currentHP = maxHP;
     isGameOver = false;
+    levelCompleted = false;
 
     // Wyczyść przeciwników i pociski
     enemies.clear();
@@ -682,6 +804,12 @@ void Level1::reset() {
     // Resetuj tło
     background_1.offsetY = 0.f;
 
+    // Reset progress bar
+    enemiesKilled = 0;
+    if (progressBarFill.has_value()) {
+        progressBarFill->setTextureRect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(0, static_cast<int>(progressBarFillTexture.getSize().y))));
+    }
+
     // Aktualizuj okrągły pasek HP (zresetuj kolor na zielony)
     hpCircle.setOutlineColor(sf::Color::Green);
 
@@ -689,3 +817,16 @@ void Level1::reset() {
         hpText->setString(std::to_string(currentHP) + "/" + std::to_string(maxHP));
     }
 }
+
+void Level1::applyShopBonuses() {
+    // Stosuj bonusy ze sklepu do lokalnych zmiennych
+    hasTripleShoot = saveData.tripleShoot;
+    damageBonus = saveData.damageBoost;
+    fireRateBonus = saveData.fireRateBonus;
+    hpBonus = saveData.hpBonus;
+
+    // Zwiększ maksymalne HP
+    maxHP = 10 + hpBonus;
+    currentHP = std::min(currentHP + hpBonus, maxHP);
+}
+

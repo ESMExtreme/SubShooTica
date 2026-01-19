@@ -102,6 +102,9 @@ void ShopInGame::handleEvent(const sf::Event& event, int* currentScreen) {
                         saveData->scrap -= item.price;
                         saveData->shopItemsPurchased[item.itemIndex] = true;
 
+                        // Zastosuj efekt przedmiotu
+                        applyShopBonus(item.itemIndex);
+
                         // Aktualizuj wyświetlanie
                         updateShopItemsDisplay();
 
@@ -245,12 +248,12 @@ void ShopInGame::initializeShopItems() {
 
     std::vector<ItemData> itemsData = {
         {"Potrójny strzał", "Strzelaj 3 pociskami naraz", 500, 0, "Assets/Media/shop_items/itemshop_3shot.png"},
-        {"Strzał w tył", "Strzelaj również do tyłu", 800, 1, "Assets/Media/shop_items/itemshop_backshoot.png"},
-        {"Szybki strzał II", "Jeszcze szybsze strzały", 500, 2, "Assets/Media/shop_items/itemshop_quickshoot2.png"}, // zamienione miejsce z Cyclop Power
+        {"Zwiększony obrażenia", "+3 obrażenia za strzał", 800, 1, "Assets/Media/shop_items/itemshop_backshoot.png"},
+        {"Szybki strzał I", "-0.15s szybkości strzału", 500, 2, "Assets/Media/shop_items/itemshop_quickshoot2.png"},
         {"HP Upgrade I", "+5 maksymalnego HP", 300, 3, "Assets/Media/shop_items/itemshop_hpup1.png"},
-        {"HP Upgrade II", "+10 maksymalnego HP", 600, 4, "Assets/Media/shop_items/itemshop_hpup2.png"},
-        {"Szybki strzał I", "Zwiększ szybkość strzałów", 250, 5, "Assets/Media/shop_items/itemshop_quickshoot1.png"},
-        {"Cyclop Power", "Specjalna moc Cyclopa", 100, 6, "Assets/Media/shop_items/itemshop_cyclop.png"} // zamienione miejsce z Szybki strzał II
+        {"HP Upgrade II", "+5 maksymalnego HP", 600, 4, "Assets/Media/shop_items/itemshop_hpup2.png"},
+        {"Szybki strzał II", "-0.15s szybkości strzału", 250, 5, "Assets/Media/shop_items/itemshop_quickshoot1.png"},
+        {"Cyclop Power", "Specjalna moc Cyclopa", 100, 6, "Assets/Media/shop_items/itemshop_cyclop.png"}
     };
 
     // Rozmieszczenie: 3 w górnym rzędzie, 4 w dolnym
@@ -320,3 +323,31 @@ void ShopInGame::updateShopItemsDisplay() {
         }
     }
 }
+
+void ShopInGame::applyShopBonus(int itemIndex) {
+    if (!saveData) return;
+
+    switch (itemIndex) {
+        case 0: // Triple shoot
+            saveData->tripleShoot = true;
+            break;
+        case 1: // +3 damage
+            saveData->damageBoost += 3;
+            break;
+        case 2: // -0.15s fire rate
+            saveData->fireRateBonus += 0.15f;
+            break;
+        case 3: // +5 HP
+            saveData->hpBonus += 5;
+            break;
+        case 4: // +5 HP
+            saveData->hpBonus += 5;
+            break;
+        case 5: // -0.15s fire rate
+            saveData->fireRateBonus += 0.15f;
+            break;
+        case 6: // Empty or future item
+            break;
+    }
+}
+

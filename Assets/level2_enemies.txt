@@ -1,20 +1,47 @@
 # Konfiguracja przeciwników dla Poziomu 2
 # Format: parametr:wartość
 
-# Spawning
+# Spawning ogólny
 spawn_interval:1.5
-max_enemies:15
+max_enemies:75
 
-# Statystyki wroga
-enemy_hp:2
-enemy_speed:120.0
-enemy_size_x:30.0
-enemy_size_y:30.0
-enemy_color_r:255
-enemy_color_g:165
-enemy_color_b:0
-# Kolor: R=255, G=165, B=0 = Pomarańczowy
+# ===== PRZECIWNIK 1: Fish3.png (z Level1) =====
+enemy1_type:texture
+enemy1_texture:Assets/Media/fish3.png
+enemy1_hp:3
+enemy1_speed:100.0
+enemy1_size_x:80.0
+enemy1_size_y:60.0
+enemy1_scrap_reward:10
+enemy1_spawn_weight:2
 
-# Nagrody
-scrap_reward:15
+# ===== PRZECIWNIK 2: Fish.png (z Level1) =====
+enemy2_type:texture
+enemy2_texture:Assets/Media/fish.png
+enemy2_hp:3
+enemy2_speed:100.0
+enemy2_size_x:60.0
+enemy2_size_y:60.0
+enemy2_scrap_reward:10
+enemy2_spawn_weight:2
+
+# ===== PRZECIWNIK 3: Fish2.png (z Level1) =====
+enemy3_type:texture
+enemy3_texture:Assets/Media/fish2.png
+enemy3_hp:3
+enemy3_speed:100.0
+enemy3_size_x:70.0
+enemy3_size_y:70.0
+enemy3_scrap_reward:10
+enemy3_spawn_weight:2
+
+# ===== PRZECIWNIK 4: Bfish.png (nowy boss) =====
+enemy4_type:texture
+enemy4_texture:Assets/Media/bfish.png
+enemy4_hp:15
+enemy4_speed:80.0
+enemy4_size_x:120.0
+enemy4_size_y:100.0
+enemy4_scrap_reward:30
+enemy4_spawn_weight:1
 

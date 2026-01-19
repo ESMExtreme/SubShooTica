@@ -1,8 +1,8 @@
 {
-  "scrap": 0,
-  "currentLevel": 0,
-  "maxLevelUnlocked": 0,
-  "tutorialCompleted": false,
+  "scrap": 100000,
+  "currentLevel": 3,
+  "maxLevelUnlocked": 3,
+  "tutorialCompleted": true,
   "shopItemsPurchased": [false, false, false, false, false, false, false]
 }
 

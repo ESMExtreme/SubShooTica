@@ -3,7 +3,7 @@
 
 # Spawning ogólny
 spawn_interval:2.0
-max_enemies:10
+max_enemies:25
 
 # ===== PRZECIWNIK 1: Fish3.png =====
 enemy1_type:texture
